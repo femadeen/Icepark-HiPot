@@ -1,0 +1,519 @@
+﻿@page "/login"
+@using System.Threading
+@using Hipot.Core.Services
+@using Hipot.Data
+@using Microsoft.Extensions.Configuration
+@using Pekasuz3.Maui.Data
+@using Pekasuz3.Maui.Services
+@implements IDisposable
+@inject XmlService XmlService
+@inject NavigationManager NavigationManager
+@inject AppState AppState
+@inject IConfiguration Configuration
+
+<style>
+    .login-container {
+        min-height: 100vh;
+        background: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="red" opacity="0.03"/><circle cx="75" cy="75" r="1" fill="red" opacity="0.03"/><circle cx="50" cy="10" r="0.5" fill="red" opacity="0.02"/><circle cx="20" cy="80" r="0.5" fill="red" opacity="0.02"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+        }
+
+    @@keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+        }
+
+        50% {
+            transform: translateY(-10px) rotate(1deg);
+        }
+    }
+
+    .login-card {
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 32px 64px rgba(220, 38, 38, 0.15), 0 0 0 1px rgba(220, 38, 38, 0.1);
+        padding: 3rem;
+        width: 100%;
+        max-width: 420px;
+        position: relative;
+        transform: translateY(0);
+        transition: all 0.3s ease;
+        border: 2px solid rgba(220, 38, 38, 0.1);
+    }
+
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 40px 80px rgba(220, 38, 38, 0.2), 0 0 0 1px rgba(220, 38, 38, 0.15);
+        }
+
+    .login-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .login-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .login-subtitle {
+        color: #64748b;
+        font-size: 1.1rem;
+        font-weight: 400;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #ffffff;
+        outline: none;
+        font-family: inherit;
+    }
+
+        .form-input:focus {
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .form-input:disabled {
+            background: #f8fafc;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+
+    .form-label {
+        position: absolute;
+        left: 1.25rem;
+        top: 1rem;
+        color: #64748b;
+        font-size: 1rem;
+        pointer-events: none;
+        transition: all 0.3s ease;
+        background: white;
+        padding: 0 0.5rem;
+    }
+
+    .form-input:focus + .form-label,
+    .form-input:not(:placeholder-shown) + .form-label {
+        top: -0.5rem;
+        left: 0.75rem;
+        font-size: 0.875rem;
+        color: #dc2626;
+        font-weight: 500;
+    }
+
+    .login-button {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        border: none;
+        border-radius: 16px;
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .login-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .login-button:hover::before {
+            left: 100%;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .login-button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+            .login-button:disabled::before {
+                display: none;
+            }
+
+    .loading-spinner {
+        width: 20px;
+        height: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @@keyframes spin {
+        0% {
+            transform: rotate(0deg);
+        }
+
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    .form-icon {
+        position: absolute;
+        right: 1.25rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        transition: color 0.3s ease;
+        pointer-events: none;
+    }
+
+    .form-input:focus ~ .form-icon {
+        color: #667eea;
+    }
+
+    .security-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+        padding: 0.75rem;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 12px;
+        color: #475569;
+        font-size: 0.875rem;
+    }
+
+    .pulsing-dot {
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        50% {
+            opacity: 0.5;
+            transform: scale(1.1);
+        }
+    }
+
+    /* Responsive design */
+    @@media (max-width: 640px) {
+        .login-container {
+            padding: 1rem;
+        }
+
+        .login-card {
+            padding: 2rem;
+        }
+
+        .login-title {
+            font-size: 2rem;
+        }
+    }
+
+    /* Message container styles */
+    .message-container {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .message-container.success {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    .message-container.error {
+        background-color: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+
+    .message-container.warning {
+        background-color: #fef9c3;
+        color: #854d0e;
+        border: 1px solid #fde047;
+    }
+
+    /* Dark mode support */
+    @@media (prefers-color-scheme: dark) {
+        .login-card {
+            background: rgba(30, 41, 59, 0.95);
+            color: #e2e8f0;
+        }
+
+        .form-input {
+            background: rgba(51, 65, 85, 0.8);
+            border-color: #475569;
+            color: #e2e8f0;
+        }
+
+        .form-label {
+            background: rgba(30, 41, 59, 0.95);
+            color: #94a3b8;
+        }
+
+        .form-input:focus + .form-label {
+            color: #818cf8;
+        }
+
+        .message-container.success {
+            background-color: #065f46;
+            color: #dcfce7;
+            border: 1px solid #047857;
+        }
+
+        .message-container.error {
+            background-color: #7f1d1d;
+            color: #fee2e2;
+            border: 1px solid #991b1b;
+        }
+
+        .message-container.warning {
+            background-color: #713f12;
+            color: #fef9c3;
+            border: 1px solid #854d0e;
+        }
+    }</style>
+
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <h1 class="login-title">Icepark-HiPot</h1>
+            <p class="login-subtitle">Welcome back! Please sign in to continue.</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_message))
+        {
+            <div class="message-container @_messageType">
+                <div class="message-content">
+                    @_message
+                </div>
+            </div>
+        }
+
+        <form @onsubmit="HandleLogin" @onsubmit:preventDefault="true">
+            <div class="form-group">
+                <input type="text"
+                       class="form-input"
+                       @bind="_en"
+                       @onkeydown="OnKeyDown"
+                       disabled="@_isLoading"
+                       placeholder=" "
+                       required />
+                <label class="form-label">Employee Number</label>
+                <svg class="form-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                </svg>
+            </div>
+
+            <div class="form-group">
+                <input type="password"
+                       class="form-input"
+                       @bind="_password"
+                       @onkeydown="OnKeyDown"
+                       disabled="@_isLoading"
+                       placeholder=" "
+                       required />
+                <label class="form-label">Password</label>
+                <svg class="form-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18,8h-1V6c0-2.76-2.24-5-5-5S7,3.24,7,6v2H6c-1.1,0-2,0.9-2,2v10c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V10C20,8.9,19.1,8,18,8z M12,17c-1.1,0-2-0.9-2-2s0.9-2,2-2s2,0.9,2,2S13.1,17,12,17z M15.1,8H8.9V6c0-1.71,1.39-3.1,3.1-3.1s3.1,1.39,3.1,3.1V8z" />
+                </svg>
+            </div>
+
+            <button type="submit"
+                    class="login-button"
+                    disabled="@_isLoading">
+                @if (_isLoading)
+                {
+                    <div class="loading-spinner"></div>
+                    <span>Signing in...</span>
+                }
+                else
+                {
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M10,17V14H3V10H10V7L15,12L10,17M10,2H19A2,2 0 0,1 21,4V20A2,2 0 0,1 19,22H10A2,2 0 0,1 8,20V18H10V20H19V4H10V6H8V4A2,2 0 0,1 10,2Z" />
+                    </svg>
+                    <span>Sign In</span>
+                }
+            </button>
+        </form>
+
+        <div class="security-badge">
+            <div class="pulsing-dot"></div>
+            <span>Secure Connection</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12,1L3,5V11C3,16.55 6.84,21.74 12,23C17.16,21.74 21,16.55 21,11V5L12,1M10,17L6,13L7.41,11.59L10,14.17L16.59,7.58L18,9L10,17Z" />
+            </svg>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _en = string.Empty;
+    private string _password = string.Empty;
+    private bool _isLoading = false;
+    private string _message = string.Empty;
+    private string _messageType = string.Empty; // "success", "error", "warning"
+    private Timer _messageTimer;
+
+    private async Task HandleLogin()
+    {
+        // Clear previous messages
+        _message = string.Empty;
+        _messageType = string.Empty;
+        
+        // Dispose of any existing timer
+        _messageTimer?.Dispose();
+
+        // Basic validation
+        if (string.IsNullOrWhiteSpace(_en) || string.IsNullOrWhiteSpace(_password))
+        {
+            _message = "Please enter both Employee Number and Password.";
+            _messageType = "warning";
+            StateHasChanged();
+            StartMessageTimer();
+            return;
+        }
+
+        _isLoading = true;
+        StateHasChanged();
+
+        try
+        {
+            var userInfo = await Task.Run(() => XmlService.ValidateUser(_en, _password));
+
+            if (userInfo != null)
+            {
+                AppState.CurrentUser = userInfo;
+                _message = $"Welcome, {userInfo.UserName}!";
+                _messageType = "success";
+
+                // Clear sensitive data
+                _password = string.Empty;
+                _en = string.Empty;
+
+                StateHasChanged();
+                
+                // Delay before navigation
+                await Task.Delay(2000);
+                NavigationManager.NavigateTo("/");
+            }
+            else
+            {
+                _message = "Invalid credentials. Please try again.";
+                _messageType = "error";
+                _password = string.Empty;
+                StateHasChanged();
+                StartMessageTimer();
+            }
+        }
+        catch (Exception ex)
+        {
+            _message = $"Login failed: {ex.Message}";
+            _messageType = "error";
+            _password = string.Empty;
+            StateHasChanged();
+            StartMessageTimer();
+        }
+        finally
+        {
+            if (!NavigationManager.Uri.EndsWith("/"))
+            {
+                _isLoading = false;
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !_isLoading)
+        {
+            await HandleLogin();
+        }
+    }
+    
+    private void StartMessageTimer()
+    {
+        _messageTimer?.Dispose();
+        _messageTimer = new Timer(ClearMessage, null, 5000, Timeout.Infinite);
+    }
+    
+    private void ClearMessage(object state)
+    {
+        _message = string.Empty;
+        _messageType = string.Empty;
+        InvokeAsync(StateHasChanged);
+    }
+    
+    public void Dispose()
+    {
+        _messageTimer?.Dispose();
+    }
+}

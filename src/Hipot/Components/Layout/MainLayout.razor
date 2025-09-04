@@ -1,0 +1,69 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+@inject NavigationManager NavigationManager
+
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <div class="main-layout">
+        @if (!IsLoginPage())
+        {
+            <div class="top-nav-container">
+                <NavMenu />
+            </div>
+        }
+        
+        <div class="main-content">
+            <MudContainer MaxWidth="MaxWidth.Large" Class="my-4 pt-4">
+                @Body
+            </MudContainer>
+        </div>
+    </div>
+</MudLayout>
+
+<style>
+    .main-layout {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    
+    .top-nav-container {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+    }
+    
+    .main-content {
+        flex: 1;
+        padding-top: 1rem;
+    }
+    
+    /* Adjust container padding since we removed the app bar */
+    .main-content .mud-container {
+        padding-top: 1rem !important;
+    }
+</style>
+
+@code {
+    bool _drawerOpen = true;
+
+    private bool IsLoginPage() => NavigationManager.Uri.EndsWith("/login");
+
+    protected override void OnInitialized()
+    {
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Data;
 using System.Threading.Tasks;
 using Hipot.Core.Services.Implementations;
 using Hipot.Core.Services.Interfaces;
 using Hipot.Data;
+using Hipot.Data.Core.Services;
 using Hipot.Data.Core.Services.Implementations.XML;
 
 namespace Hipot.Core.Services;
@@ -30,7 +31,7 @@ public class SequenceService
 {
     private readonly DataService _dataService;
     private readonly XmlLogService _logService;
-    private readonly MappingService _mappingService; // Assuming this will be created
+    private readonly MappingService _mappingService;
 
     public event Action<int, string> OnLogMessage;
     public event Action<int, string> OnDetailLogMessage;

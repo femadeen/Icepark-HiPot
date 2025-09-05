@@ -1,4 +1,6 @@
-﻿@using Hipot.Data
+@using Hipot.Data
+@using Hipot.Data.Core.Models
+@using Hipot.Components.Shared
 
 @inject AppState AppState
 @inject NavigationManager NavigationManager
@@ -22,15 +24,9 @@
             </svg>
             <span>About</span>
         </a>
-    </div>
 
-    <div class="nav-user">
         @if (AppState.CurrentUser != null)
         {
-            <div class="user-info">
-                <span>Welcome, @AppState.CurrentUser.UserName</span>
-            </div>
-
             <button class="logout-button" @onclick="Logout">
                 <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
@@ -38,34 +34,30 @@
                 <span>Logout</span>
             </button>
         }
+        <button class="exit-button" @onclick="() => ShowExitConfirmation = true">
+            <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+            </svg>
+            <span>Exit</span>
+        </button>
     </div>
 </div>
+
+@if (ShowExitConfirmation)
+{
+    <MessageBoxPanel Title="Exit Confirmation"
+                     Message="Are you sure you want to exit?"
+                     Buttons="MessageBoxButtons.YesNo"
+                     OnYesClicked="ExitApplication"
+                     OnNoClicked="() => ShowExitConfirmation = false" />
+}
+
 
 <style>
     .top-nav {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        background: #ffffff;
-        padding: 0 2rem;
-        height: 60px;
-        border-bottom: 2px solid rgba(220, 38, 38, 0.1);
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-
-    .nav-brand {
-        display: flex;
-        align-items: center;
-    }
-
-    .nav-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #dc2626, #b91c1c);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        letter-spacing: -0.02em;
     }
 
     .nav-links {
@@ -73,136 +65,35 @@
         align-items: center;
         gap: 1rem;
     }
-
-    .nav-link {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1rem;
-        border-radius: 12px;
-        text-decoration: none;
-        color: #64748b;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
-    }
-
-        .nav-link:hover {
-            background: rgba(220, 38, 38, 0.05);
-            color: #dc2626;
-            transform: translateY(-2px);
-        }
-
-        .nav-link.active {
-            background: rgba(220, 38, 38, 0.1);
-            color: #dc2626;
-            border: 2px solid rgba(220, 38, 38, 0.2);
-        }
-
-    .nav-icon {
-        width: 20px;
-        height: 20px;
-    }
-
-    .nav-user {
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-    }
-
-    .user-info {
-        background: rgba(220, 38, 38, 0.1);
-        padding: 0.5rem 1rem;
-        border-radius: 16px;
-        font-weight: 500;
-        color: #64748b;
-    }
-
-    .logout-button {
+    
+    .exit-button {
         display: flex;
         align-items: center;
         gap: 0.5rem;
         padding: 0.75rem 1rem;
         border: none;
         border-radius: 12px;
-        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        background: linear-gradient(135deg, #64748b, #475569);
         color: white;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 6px rgba(220, 38, 38, 0.1);
-    }
-
-        .logout-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(220, 38, 38, 0.2);
-        }
-
-        .logout-button:active {
-            transform: translateY(0);
-        }
-
-    /* Dark mode support */
-    @@media (prefers-color-scheme: dark) {
-        .top-nav {
-            background: rgba(30, 41, 59, 0.95);
-            border-bottom: 2px solid rgba(220, 38, 38, 0.2);
-        }
-
-        .nav-link {
-            color: #94a3b8;
-        }
-
-            .nav-link:hover {
-                background: rgba(220, 38, 38, 0.1);
-                color: #f87171;
-            }
-
-            .nav-link.active {
-                background: rgba(220, 38, 38, 0.2);
-                color: #f87171;
-                border: 2px solid rgba(220, 38, 38, 0.3);
-            }
-
-        .user-info {
-            background: rgba(220, 38, 38, 0.2);
-            color: #cbd5e1;
-        }
-    }
-
-    /* Responsive design */
-    @@media (max-width: 768px) {
-        .top-nav {
-            padding: 0 1rem;
-            flex-wrap: wrap;
-            height: auto;
-            min-height: 60px;
-        }
-
-        .nav-links {
-            order: 3;
-            width: 100%;
-            padding: 0.5rem 0;
-            gap: 0.5rem;
-        }
-
-        .nav-link {
-            padding: 0.5rem 0.75rem;
-            font-size: 0.9rem;
-        }
-
-        .nav-icon {
-            width: 18px;
-            height: 18px;
-        }
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 </style>
 
 @code {
+    private bool ShowExitConfirmation { get; set; }
+
     private void Logout()
     {
         AppState.CurrentUser = null;
         NavigationManager.NavigateTo("/login");
+    }
+
+    private void ExitApplication()
+    {
+        Application.Current.Quit();
     }
 
     private bool IsActive(string path)

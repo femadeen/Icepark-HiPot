@@ -1,15 +1,20 @@
-﻿
+@using System.Diagnostics
+@using System.Timers
 @using Hipot.Core.Services
+@using Hipot.Data.Core.Models
+@using Hipot.Components.Shared
 
 <div class="channel-card">
     <div class="channel-header">
         <h2 class="channel-title">@ChannelState.Idm: @ChannelState.CurrentStatus</h2>
+        <span class="elapsed-time">@ElapsedTime</span>
     </div>
     <div class="channel-content">
         <div class="form-group">
             <input type="text" 
                    class="form-input" 
                    @bind="ChannelState.SerialNumber" 
+                   @onkeydown="HandleSNKeyDown"
                    placeholder=" " />
             <label class="form-label">Serial Number</label>
         </div>
@@ -47,6 +52,32 @@
     </div>
 </div>
 
+@if (ShowInputPanel)
+{
+    <InputPanel Title="@InputPanelTitle"
+                InputItems="@InputItems"
+                OnOkClicked="HandleInputPanelOk"
+                OnAbortClicked="HandleInputPanelAbort" />
+}
+
+@if (ShowMessageBox)
+{
+    <MessageBoxPanel Title="@MessageBoxTitle"
+                     Message="@MessageBoxMessage"
+                     ImageUrl="@MessageBoxImageUrl"
+                     Buttons="@MessageBoxButtons"
+                     OnOkClicked="HandleMessageBoxOk"
+                     OnYesClicked="HandleMessageBoxYes"
+                     OnNoClicked="HandleMessageBoxNo" />
+}
+
+@if (ShowPassFailPanel)
+{
+    <PassFailPanel IsPassed="@IsPassed"
+                   OnOkClicked="HandlePassFailPanelOk" />
+}
+
+
 <style>
     .channel-card {
         background: #ffffff;
@@ -59,7 +90,9 @@
     }
 
     .channel-header {
-        text-align: center;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         margin-bottom: 2rem;
         padding-bottom: 1rem;
         border-bottom: 1px solid rgba(220, 38, 38, 0.1);
@@ -74,6 +107,12 @@
         background-clip: text;
         margin: 0;
         letter-spacing: -0.02em;
+    }
+
+    .elapsed-time {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #64748b;
     }
 
     .form-group {
@@ -309,13 +348,98 @@
     [Inject]
     private SequenceService SequenceService { get; set; }
 
+    private bool ShowInputPanel { get; set; }
+    private string InputPanelTitle { get; set; }
+    private List<InputItem> InputItems { get; set; } = new();
+
+    private bool ShowMessageBox { get; set; }
+    private string MessageBoxTitle { get; set; }
+    private string MessageBoxMessage { get; set; }
+    private string MessageBoxImageUrl { get; set; }
+    private MessageBoxButtons MessageBoxButtons { get; set; }
+
+    private bool ShowPassFailPanel { get; set; }
+    private bool IsPassed { get; set; }
+
+    private System.Timers.Timer _timer;
+    private Stopwatch _stopwatch = new Stopwatch();
+    private string ElapsedTime = "00:00:00";
+
+    protected override void OnInitialized()
+    {
+        _timer = new System.Timers.Timer(1000);
+        _timer.Elapsed += OnTimerTick;
+        _timer.AutoReset = true;
+    }
+
     private async Task StartTest()
     {
+        _stopwatch.Start();
+        _timer.Start();
         await SequenceService.ExecuteTestSequenceAsync(ChannelState.Idm);
+        _stopwatch.Stop();
+        _timer.Stop();
     }
 
     private void AbortTest()
     {
         ChannelState.ShouldStop = true;
+        _stopwatch.Stop();
+        _timer.Stop();
+    }
+
+    private void OnTimerTick(object sender, ElapsedEventArgs e)
+    {
+        ElapsedTime = _stopwatch.Elapsed.ToString(@"hh\:mm\:ss");
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task HandleSNKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await StartTest();
+        }
+    }
+
+    private void HandleInputPanelOk()
+    {
+        ShowInputPanel = false;
+        // Logic to handle the input from the user
+    }
+
+    private void HandleInputPanelAbort()
+    {
+        ShowInputPanel = false;
+        // Logic to handle the abort action
+    }
+
+    private void HandleMessageBoxOk()
+    {
+        ShowMessageBox = false;
+        // Logic to handle the OK action
+    }
+
+    private void HandleMessageBoxYes()
+    {
+        ShowMessageBox = false;
+        // Logic to handle the Yes action
+    }
+
+    private void HandleMessageBoxNo()
+    {
+        ShowMessageBox = false;
+        // Logic to handle the No action
+    }
+
+    private void HandlePassFailPanelOk()
+    {
+        ShowPassFailPanel = false;
+        // Logic to handle the OK action
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
     }
 }

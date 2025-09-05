@@ -6,6 +6,7 @@ using Hipot.Core.Services.Implementations;
 using Hipot.Core.Services.Implementations.XML;
 using Hipot.Core.Services.Interfaces;
 using Hipot.Data;
+using Hipot.Data.Core.Services;
 using Hipot.Data.Core.Services.Implementations.XML;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -43,6 +44,9 @@ public static class MauiProgram
 
             //Services
             builder.Services.AddSingleton<XmlLogService>();
+                        builder.Services.AddSingleton<VpdService>();
+            builder.Services.AddSingleton<XmlConfigService>();
+
             builder.Services.AddSingleton<IHttpService, HttpService>();
             builder.Services.AddSingleton<IUserService, XmlUserService>();
             builder.Services.AddSingleton<IFileService, XmlFileService>();

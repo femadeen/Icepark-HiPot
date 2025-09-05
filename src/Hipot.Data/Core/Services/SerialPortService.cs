@@ -1,93 +1,88 @@
-﻿
+using System;
+using System.Collections.Concurrent;
 using System.IO.Ports;
-using System.Collections.Generic;
-using Hipot.Core.DTOs;
+using System.Threading.Tasks;
 
-namespace Hipot.Core.Services;
-
-public class SerialPortService : IDisposable
+namespace Hipot.Core.Services
 {
-    private readonly Dictionary<string, SerialPort> _srpPorts = new(); // Channel-specific ports
-    private readonly Dictionary<string, SerialPort> _srcPorts = new(); // Common resource ports
-
-    public void InitializePorts(List<ChannelConfig> channelConfigs, List<string> commonPortSettings)
+    public class SerialPortService
     {
-        // The settings strings are like "COM1,9600,N,8,1"
-        foreach (var config in channelConfigs)
+        private readonly ConcurrentDictionary<string, SerialPort> _serialPorts = new();
+
+        public void AddPort(string portKey, string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits)
         {
-            foreach (var portSetting in config.SerialPorts)
+            var serialPort = new SerialPort(portName, baudRate, parity, dataBits, stopBits);
+            _serialPorts.TryAdd(portKey, serialPort);
+        }
+
+        public void OpenPort(string portKey)
+        {
+            if (_serialPorts.TryGetValue(portKey, out var serialPort) && !serialPort.IsOpen)
             {
-                var settings = portSetting.Split(',');
-                var portName = settings[0];
-                var port = new SerialPort(portName,
-                                          int.Parse(settings[1]),
-                                          (Parity)Enum.Parse(typeof(Parity), settings[2]),
-                                          int.Parse(settings[3]),
-                                          (StopBits)Enum.Parse(typeof(StopBits), settings[4]));
-                // The key could be a combination of channel and port name
-                _srpPorts.Add($"{config.Name}_{portName}", port);
+                serialPort.Open();
             }
         }
 
-        foreach (var portSetting in commonPortSettings)
+        public void ClosePort(string portKey)
         {
-             var settings = portSetting.Split(',');
-             var portName = settings[0];
-             var port = new SerialPort(portName,
-                                       int.Parse(settings[1]),
-                                       (Parity)Enum.Parse(typeof(Parity), settings[2]),
-                                       int.Parse(settings[3]),
-                                       (StopBits)Enum.Parse(typeof(StopBits), settings[4]));
-            _srcPorts.Add(portName, port);
+            if (_serialPorts.TryGetValue(portKey, out var serialPort) && serialPort.IsOpen)
+            {
+                serialPort.Close();
+            }
         }
-    }
 
-    public void WriteToSrp(string portKey, string data)
-    {
-        if (_srpPorts.TryGetValue(portKey, out var port) && port.IsOpen)
+        public void CloseAllPorts()
         {
-            port.Write(data);
+            foreach (var port in _serialPorts.Values)
+            {
+                if (port.IsOpen)
+                {
+                    port.Close();
+                }
+            }
         }
-    }
 
-    public string ReadFromSrp(string portKey)
-    {
-        if (_srpPorts.TryGetValue(portKey, out var port) && port.IsOpen)
+        public void WriteToSrp(string portKey, string data)
         {
-            return port.ReadExisting();
+            if (_serialPorts.TryGetValue(portKey, out var serialPort) && serialPort.IsOpen)
+            {
+                serialPort.Write(data);
+            }
         }
-        return string.Empty;
-    }
 
-    public void WriteToSrc(string portName, string data)
-    {
-        if (_srcPorts.TryGetValue(portName, out var port) && port.IsOpen)
+        public string ReadFromSrp(string portKey)
         {
-            port.Write(data);
+            if (_serialPorts.TryGetValue(portKey, out var serialPort) && serialPort.IsOpen)
+            {
+                return serialPort.ReadExisting();
+            }
+            return string.Empty;
         }
-    }
 
-    public string ReadFromSrc(string portName)
-    {
-        if (_srcPorts.TryGetValue(portName, out var port) && port.IsOpen)
+        public async Task<string> SrpWriteAndRead(string portKey, string data, string expectedResponse, int timeoutMs)
         {
-            return port.ReadExisting();
-        }
-        return string.Empty;
-    }
+            if (_serialPorts.TryGetValue(portKey, out var serialPort) && serialPort.IsOpen)
+            {
+                serialPort.DiscardInBuffer();
+                serialPort.Write(data);
 
+                var startTime = DateTime.Now;
+                var response = string.Empty;
 
-    public void Dispose()
-    {
-        foreach (var port in _srpPorts.Values)
-        {
-            if (port.IsOpen) port.Close();
-            port.Dispose();
-        }
-        foreach (var port in _srcPorts.Values)
-        {
-            if (port.IsOpen) port.Close();
-            port.Dispose();
+                while ((DateTime.Now - startTime).TotalMilliseconds < timeoutMs)
+                {
+                    response += serialPort.ReadExisting();
+                    if (response.Contains(expectedResponse))
+                    {
+                        return response;
+                    }
+                    await Task.Delay(100);
+                }
+
+                return response; // Or throw a timeout exception
+            }
+
+            return string.Empty;
         }
     }
 }

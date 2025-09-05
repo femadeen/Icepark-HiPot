@@ -1,0 +1,114 @@
+@using Hipot.Data.Core.Models
+
+<div class="input-panel-overlay">
+    <div class="input-panel">
+        <div class="input-panel-header">
+            <h3>@Title</h3>
+        </div>
+        <div class="input-panel-body">
+            @foreach (var item in InputItems)
+            {
+                <div class="input-item">
+                    <label>@item.Name:</label>
+                    <input type="text" @bind="item.Value" />
+                    @if (item.IsValid)
+                    {
+                        <span class="valid-icon">✔</span>
+                    }
+                    <label class="format-label">@item.Format</label>
+                </div>
+            }
+        </div>
+        <div class="input-panel-footer">
+            <button class="btn-primary" @onclick="OnOkClicked">OK</button>
+            <button class="btn-secondary" @onclick="OnAbortClicked">Abort</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .input-panel-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+    .input-panel {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: 500px;
+        max-width: 90%;
+    }
+
+    .input-panel-header {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .input-panel-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+    }
+
+    .input-panel-body {
+        padding: 1rem;
+    }
+
+    .input-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .input-item label {
+        width: 120px;
+    }
+
+    .input-item input {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .valid-icon {
+        color: green;
+        margin-left: 0.5rem;
+    }
+
+    .format-label {
+        margin-left: 1rem;
+        font-size: 0.8rem;
+        color: #666;
+    }
+
+    .input-panel-footer {
+        padding: 1rem;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+    }
+</style>
+
+@code {
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public List<InputItem> InputItems { get; set; }
+
+    [Parameter]
+    public EventCallback OnOkClicked { get; set; }
+
+    [Parameter]
+    public EventCallback OnAbortClicked { get; set; }
+}

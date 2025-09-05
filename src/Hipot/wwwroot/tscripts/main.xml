@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+	<card snformat="RRTCTH21???????">
+		<cardname>RHO200 Rack Unit</cardname>
+		<testscript>rho200.xml</testscript>		
+	</card>
+	<card snformat="RRTCTH21??????????">
+		<cardname>RHO200 Rack Unit</cardname>
+		<testscript>rho200.xml</testscript>		
+	</card>	
+	<card snformat="TEST">
+		<cardname>RHO200 Rack Unit</cardname>
+		<testscript>rho200.xml</testscript>		
+	</card>	
+</maintest>

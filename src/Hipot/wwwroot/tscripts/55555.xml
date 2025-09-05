@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+	<theader tname="TEST 55555">
+	  <trevision>1.0</trevision>
+	  <tdescription>55555 Functional Card Test.</tdescription>
+	  <towner>Somsak Bo.</towner>
+	</theader>
+	
+	
+	<test tname="LED Check">
+		<message>Test message!!!,critical</message>
+		<humanjudge>Do you see the LED light as shown in picture?,D:\Proj\Pekasuz3\Pekasuz3\bin\Debug\pekimg\led.jpg,stretch</humanjudge>
+	</test>
+	<test tname="LED Check2">
+		<humanjudge>Do you see the LED1 light?,QUESTION,zoom</humanjudge>
+	</test>
+	<test tname="LED Check2">
+		<humanjudge>Do you see the LED2 light?,INFO,zoom</humanjudge>
+	</test>
+</maintest>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+<theader tname="rho200">
+  <trevision>1.0</trevision>
+  <tdescription>Rho200 Hi-Pot Test.</tdescription>
+  <towner>Akrapoom K.</towner>
+</theader>
+<pretest tname="ODC Checking">
+	<gethttpget>ODCCURST,http://10.196.100.17/des/elm/check.asp?sn=(*UUTSN*)</gethttpget>
+	<display>Check Current station : (*UUTSN*),(*NA*)</display> 
+	<display>Current Station : (*ODCCURST*),(*NA*)</display> 
+	<chkodc>ODCCURST,610005</chkodc>
+</pretest>
+
+<test tname="Initial Electrical Safety Compliance Analyzer">
+	<display>Electrical Safety Compliance Analyzer Model : ,[*ENTER*]</display>
+	<srpwonly>SRP_0,*IDN?,[*CRLF*]</srpwonly>
+	<srpronly>SRP_0</srpronly>
+	<chkinword>SRP_0,8204,failstop</chkinword>
+</test>
+
+<test tname="RESET LAST RESULT">
+	<display>Reseting : ,[*ENTER*]</display>
+	<srpwonly>SRP_0,RESET,[*CRLF*]</srpwonly>
+	<delay>1000</delay>
+</test>
+<test tname="INTERLOCK CHECK">
+	<display>Interlock Sensoring check : ,[*ENTER*]</display>
+	<srpwonly>SRP_0,RI?,[*CRLF*]</srpwonly>
+	<srpronly>SRP_0</srpronly>	
+	<delay>1000</delay>
+	<chkinword>SRP_0,0,failstop</chkinword>
+</test>
+<test tname="START TEST">
+	<display>Start Hi-Pot Test : ,[*ENTER*]</display>
+	<display>START TEST :,[*NA*]</display>
+	<srpwonly>SRP_0,TEST,[*CRLF*]</srpwonly>
+	<delay>10000</delay>
+	<delay>1000</delay>
+	<display>TEST RESULT : ,[*ENTER*]</display>
+	<srpwonly>SRP_0,RD 1?,[*CRLF*]</srpwonly>
+	<srpronly>SRP_0</srpronly>
+	<chkinword>SRP_0,PASS,failstop</chkinword>
+</test>
+<posttest tname="ODC XML Upload">		
+
+	<getodcnewticket>TICKET,http://10.196.100.17/des/elm/getticket.asp?SN=(*UUTSN*)</getodcnewticket>
+    <regetodcticket>TICKET,http://10.196.100.17/des/elm/getparameter.asp?sn=(*UUTSN*)&amp;profile=ticket</regetodcticket>
+	<chkodc>TICKET,TICKET</chkodc>
+	<getodcxmlformat>BXML,(*ODCTESTRESULT*),C:\Rho200-Hipot\oXml\elm_pass.xml,C:\Rho200-Hipot\oXml\elm_fail.xml</getodcxmlformat>
+<!--	<display>(*TICKET*):(*UUTSN*):(*ODCCURST*):(*TESTERID*):(*UEN*):(*ODCTESTRESULT*):(*SRP_0*):(*FAILDESC*)</display>-->
+	<getodcxml>XML,(*BXML*),(*TICKET*),(*UUTSN*),(*ODCCURST*),(*TESTERID*),(*UEN*),(*ODCTESTRESULT*),(*SRP_0*),(*FAILDESC*)</getodcxml>	
+	<gethttppostxml>(*XML*),http://10.196.100.17/des/elm/result.asp</gethttppostxml>
+	
+</posttest>
+<posttest tname="ODC Process">		
+	<processdata>PROCESS,http://10.196.100.17/des/elm/process.asp?ticket=(*TICKET*)&amp;process=true</processdata>
+	<display>Process Data : (*PROCESS*),(*NA*)</display> 
+	<chkinword>PROCESS,SUCCESS,failstop</chkinword>
+</posttest>
+</maintest>

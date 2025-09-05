@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<usage>
+	<channel name="RHO200 Hi-Pot">
+		<srp>SRP_0,3,9600,8,N,1</srp>
+	</channel>		
+</usage>

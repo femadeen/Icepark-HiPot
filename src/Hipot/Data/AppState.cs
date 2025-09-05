@@ -1,6 +1,5 @@
 ﻿
 using Hipot.Core.DTOs;
-using Hipot.Core.Services;
 
 namespace Hipot.Data;
 

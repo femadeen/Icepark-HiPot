@@ -1,12 +1,11 @@
-﻿@page "/login"
+@page "/login"
 @using System.Threading
 @using Hipot.Core.Services
+@using Hipot.Core.Services.Interfaces
 @using Hipot.Data
 @using Microsoft.Extensions.Configuration
-@using Pekasuz3.Maui.Data
-@using Pekasuz3.Maui.Services
 @implements IDisposable
-@inject XmlService XmlService
+@inject IUserService UserService
 @inject NavigationManager NavigationManager
 @inject AppState AppState
 @inject IConfiguration Configuration
@@ -446,7 +445,7 @@
 
         try
         {
-            var userInfo = await Task.Run(() => XmlService.ValidateUser(_en, _password));
+            var userInfo = await Task.Run(() => UserService.ValidateUserAsync(_en, _password));
 
             if (userInfo != null)
             {

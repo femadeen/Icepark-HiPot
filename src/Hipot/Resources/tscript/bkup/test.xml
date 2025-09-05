@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+<theader tname="Lilac FCT">
+  <trevision>1.0</trevision>
+  <tdescription>Lilac Functional Card Test.</tdescription>
+  <towner>Somsak Bo.</towner>
+</theader>
+
+<test tname="Initial DMM">
+	<use>serial_port_1,write,":SYST:REM"</use>
+	<use>delay,1000</use>
+	<use>serial_port_1,write,"*RST"</use>
+	<use>delay,1000</use>
+	<use>serial_port_1,write,"*CLS"</use>
+	<use>delay,1000</use>
+	<use>serial_port_1,write,"*IDN?"</use>
+	<use>delay,1000</use>
+	<use>serial_port_1,read,5000,stop</use>
+	<msglog>"DMM Model : " + srpread_1</msglog>
+	<check>DMM:,NA,inword,"34401",srpread_1,pass,failstop</check>
+</test>
+<test tname="Power On UUT">
+	<use>Parallel Port_1,out,0x80</use>
+	<use>delay,1000</use>	
+	<use>serial port_2,write,":CONF:VOLT:DC 10,0.001"</use>
+	<use>delay,1000</use>
+	<use>serial port_2,write,":READ?"</use>
+	<use>delay,1000</use>
+	<use>serial port_2,read,5000,stop</use>
+	<check>Input Current,Amp,inrange,srpread_2,1,5,pass,failstop</check>
+</test>
+<test tname="Login to Linux">
+	<use>serial port_1,write,"vbcrlf"</use>
+	<use>delay,1000</use>
+	<use>serial port_1,read,5000,srpread_1,stop</use>
+	<check>rawdata,NA,inword,srpread_1,"#",pass,passskip</check>
+	<check>rawdata,HIDE,inword,srpread_1,"login:",failstop</check>
+	<use>serial port_1,write,"root"</use>
+	<use>delay,1000</use>
+	<use>serial port_1,write,"vssadmin"</use>
+	<use>delay,1000</use>
+	<use>serial port1,read,5000,srpread_1,stop</use>
+	<check>rawdata,NA,inword,srpread_1,"#",pass,failstop</check>	
+</test>
+</maintest>

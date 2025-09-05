@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<usage>
+	<common>
+		<src>SRC_0,1,115200,8,N,1</src>
+	</common>
+	<channel name="CH0">
+		<srp>SRP_0,10,115200,8,N,1</srp>
+		<srp>SRP_1,11,115200,8,N,1</srp>
+		<src>SRC_0,0</src>
+	</channel>
+	<channel name="CH1">
+		<srp>SRP_0,12,115200,8,N,1</srp>
+		<srp>SRP_1,13,115200,8,N,1</srp>
+		<src>SRC_0,1</src>
+	</channel>
+	<channel name="CH2">
+		<srp>SRP_0,14,115200,8,N,1</srp>
+		<srp>SRP_1,15,115200,8,N,1</srp>
+		<src>SRC_0,2</src>
+	</channel>
+	<channel name="CH3">
+		<!--
+		<srp>SRP_0,16,115200,8,N,1</srp>
+		
+		<srp>SRP_1,17,115200,8,N,1</srp>
+		-->
+		<src>SRC_0,3</src>
+	</channel>
+	<channel name="CH4">
+		<srp>SRP_0,18,115200,8,N,1</srp>
+		<srp>SRP_1,19,115200,8,N,1</srp>
+		<src>SRC_0,4</src>
+	</channel>
+	<channel name="CH5">
+		<srp>SRP_0,20,115200,8,N,1</srp>
+		<srp>SRP_1,21,115200,8,N,1</srp>
+		<src>SRC_0,5</src>
+	</channel>
+	<channel name="CH6">
+		<srp>SRP_0,22,115200,8,N,1</srp>
+		<srp>SRP_1,23,115200,8,N,1</srp>
+		<src>SRC_0,6</src>
+	</channel>
+	<channel name="CH7">
+		<srp>SRP_0,24,115200,8,N,1</srp>
+		<srp>SRP_1,25,115200,8,N,1</srp>
+		<src>SRC_0,7</src>
+	</channel>
+</usage>

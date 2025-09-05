@@ -1,9 +1,10 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.13.35828.75 d17.13
+VisualStudioVersion = 17.13.35828.75
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hipot", "src\Hipot\Hipot.csproj", "{FE3169C5-18D1-4C5A-9326-BB6001C52B9F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hipot.Data", "src\Hipot.Data\Hipot.Data.csproj", "{5F5B8720-7BA8-4459-8A7D-32A33E7A3473}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +16,10 @@ Global
 		{FE3169C5-18D1-4C5A-9326-BB6001C52B9F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE3169C5-18D1-4C5A-9326-BB6001C52B9F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE3169C5-18D1-4C5A-9326-BB6001C52B9F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F5B8720-7BA8-4459-8A7D-32A33E7A3473}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F5B8720-7BA8-4459-8A7D-32A33E7A3473}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F5B8720-7BA8-4459-8A7D-32A33E7A3473}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F5B8720-7BA8-4459-8A7D-32A33E7A3473}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

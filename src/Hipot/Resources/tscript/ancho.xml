@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+	<theader tname="ANCHO FCT">
+		  <trevision>1.0</trevision>
+		  <tdescription>ANCHO Functional Card Test.</tdescription>
+		  <towner>Sudjai Mo.</towner>
+	</theader>
+	<test tname="ANCHO  Programming">
+		<srpwonly>SRP_0,[*enter*]</srpwonly>
+		<delay>1000</delay>
+		<srpwrchk>SRP_0,./LCC_program_check.sh,Enclosure SN:,60000</srpwrchk>	
+		<srpwrchk>SRP_0,(*Enclosure_SN*),LCC SN:,60000</srpwrchk>
+		<delay>2000</delay>
+		<srpwrchk>SRP_0,(*UUTSN*),Please input WWN SEED:,60000</srpwrchk>
+		<srpwrchk>SRP_0,(*WWN_SEED*),Press ENTER to start Programming:,60000</srpwrchk>
+		<srpwrchk>SRP_0,[*enter*],bash-4.2#,60000</srpwrchk>		
+		<chkinword>SRP_0,FAIL      : 0</chkinword>
+	</test>
+	
+</maintest>

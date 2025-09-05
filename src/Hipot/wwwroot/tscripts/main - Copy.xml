@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+	<card snformat="11S00E3426YA10UE??????">
+		<cardname>Lilac Standard Profile</cardname>
+		<testscript>00E3425YA10.xml</testscript>		
+	</card>
+	<card snformat="11S00E2934YA10UE??????">
+		<cardname>Lilac Low Profile</cardname>
+		<testscript>00E3425YA10.xml</testscript>		
+	</card>	
+	<card snformat="11S00E3425YA10UE??????">
+		<cardname>Lilac Low Profile</cardname>
+		<testscript>lilac2.xml</testscript>		
+	</card>	
+	<card snformat="55???">
+		<cardname>TEST 55555</cardname>
+		<testscript>test55555.xml</testscript>	
+	</card>
+	<card snformat="RPI???">
+		<cardname>TEST 55555</cardname>
+		<testscript>rpi1.xml</testscript>			
+	</card>
+	<card snformat="4???">
+		<cardname>TEST 4444</cardname>
+		<testscript>rpi2.xml</testscript>			
+	</card>
+	<card snformat="CF2???????????">
+		<cardname>ANCHO LCC</cardname>
+		<testscript>ancho.xml</testscript>
+		<uid>Enclosure_SN,14,NA,NA,Format,FCN???????????</uid>
+		<uid>WWN_SEED,8,NA,NA,value,00000000-FFFFFFFF</uid>
+	</card> 	
+</maintest>

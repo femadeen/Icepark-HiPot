@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+	<test tname="LED Check">
+		<humanjudge>Do you see the LED light as the shown picture?,D:\Proj\Pekasuz3\Pekasuz3\bin\Debug\pekimg\led.jpg,stretch</humanjudge>
+	</test>
+</maintest>

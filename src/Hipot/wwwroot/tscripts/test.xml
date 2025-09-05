@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+<theader tname="Lilac FCT">
+  <trevision>1.0</trevision>
+  <tdescription>Lilac Functional Card Test.</tdescription>
+  <towner>Somsak Bo.</towner>
+</theader>
+<test tname="Initial DMM">
+	<use>SRP_1,write,SYST:REM</use>
+	<use>DELAY,1000</use>
+	<use>SRP_1,write,*RST</use>
+	<use>DELAY,1000</use>
+	<use>SRP_1,write,*CLS</use>
+	<use>DELAY,1000</use>
+	<display>DMM Model : </display>
+	<use>SRP_1,read,*IDN?,[*NA*],5000,show</use>
+	<use>DELAY,1000</use>	
+	<check>SRP_1,inword,34970A,failstop</check>
+</test>
+<test tname="UUT's 12V current measurement @No Load.">
+	<display>12V Current : </display>
+	<use>SRP_1,read,MEAS:VOLT:DC? (@101),[*NA*],500,show_Amp.</use>	
+	<check>SRP_1,value,0.03_0.05,failstop</check>
+</test>
+<test tname="UUT's 3.3V current measurement @No Load.">
+	<display>3.3V Current : </display>
+	<use>SRP_1,read,MEAS:VOLT:DC? (@102),[*NA*],500,show_Amp.</use>
+	<check>SRP_1,value,0.8_1.3,failstop</check>
+</test>
+<test tname="Login to Linux">
+	<use>SRP_0,read,,[root@localhost ~]#  ,60000,show</use>	
+	<check>SRP_0,inword,[root@localhost ~]#,failstop</check>
+</test>
+<test tname="PCI-e List Check">
+	<use>SRP_0,read,lspci -vv | grep 'USB controller: Texas Instruments',[root@localhost ~]#  ,60000,show</use>
+	<check>SRP_0,inword,USB controller: Texas Instruments,failstop</check>
+</test>
+<test tname="Channel 1 Speed test">
+	<use>SRP_0,read,hdparm -t /dev/sda,[root@localhost ~]#  ,60000,show</use>
+	<check>SRP_0,valueinline,Timing buffered disk reads:  [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,205_215</check>
+</test>
+<test tname="Channel 2 Speed test">
+	<use>SRP_0,read,hdparm -t /dev/sdb,[root@localhost ~]#  ,60000,show</use>
+	<check>SRP_0,valueinline,Timing buffered disk reads:  [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,20_25</check>
+</test>
+<test tname="Channel 3 Speed test">
+	<use>SRP_0,read,hdparm -t /dev/sdc,[root@localhost ~]#  ,60000,show</use>
+	<check>SRP_0,valueinline,Timing buffered disk reads:  [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,70_77</check>
+</test>
+<test tname="Channel 4 Speed test">
+	<use>SRP_0,read,hdparm -t /dev/sdd,[root@localhost ~]#  ,60000,show</use>
+	<check>SRP_0,valueinline,Timing buffered disk reads:  [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,70_77</check>
+</test>
+<test tname="Channel 5 Speed test">
+	<use>SRP_0,read,hdparm -t /dev/sdd,[root@localhost ~]#  ,60000,show</use>
+	<check>SRP_0,valueinline,Timing buffered disk reads:  [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,70_77</check>
+</test>
+<test tname="Channel 6 Speed test">
+	<use>SRP_0,read,hdparm -t /dev/sdd,[root@localhost ~]#  ,60000,show</use>
+	<check>SRP_0,valueinline,Timing buffered disk reads:  [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,70_77</check>
+</test>
+</maintest>

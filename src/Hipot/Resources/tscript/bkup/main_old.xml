@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+	<card snformat="11S00E5413YL10UE??????">
+		<cardname>Lilac</cardname>
+		<testscript>test.xml</testscript>
+		<uniqueid>SASWWID,2,16,51S,NA,value,A000000000000000-FFFFFFFFFFFFFFFF,0000000000000000-BFFFFFFFFFFFFFFF</uniqueid>		
+		<uniqueid>MACID,6,12,51S,NA,value,NA,NA,NA,NA,NA,NA</uniqueid>	
+		<uniqueid>PCBSN,1,22,11S,NA,format,11S00E9400YA10UL??????</uniqueid>	
+	</card>
+</maintest>

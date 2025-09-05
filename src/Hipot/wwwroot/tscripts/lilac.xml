@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+	<theader tname="Lilac FCT">
+	  <trevision>1.0</trevision>
+	  <tdescription>Lilac Functional Card Test.</tdescription>
+	  <towner>Somsak Bo.</towner>
+	</theader>
+	<pretest tname="ODC Checking">
+		<gethttp>odccheck,get,http://10.196.4.48/ibm_se/check.asp?SN=(*SN*)</gethttp>
+		<chkinword>odccheck,500200</chkinword>
+	</pretest>
+	<test tname="Login to RHEL">
+		<delay>10000</delay>
+		<srpwrite>SRP_0,(*enter*)</srpwrite>
+		<delay>3000</delay>
+		<srpwrite>SRP_0,(*enter*)</srpwrite>
+		<delay>3000</delay>
+		<srpwrite>SRP_0,root</srpwrite>
+		<delay>3000</delay>
+		<srpwrite>SRP_0,vssadmin</srpwrite>
+		<srpread>SRP_0,(*enter*),[root@localhost ~]#,60000,show</srpread>
+		<chkinword>SRP_0,[root@localhost ~]#,failstop</chkinword>		
+	</test>
+	<test tname="Initial DMM">
+		<srpwrite>SRP_1,SYST:REM</srpwrite>
+		<delay>1000</delay>
+		<srpwrite>SRP_1,*RST</srpwrite>
+		<delay>1000</delay>
+		<srpwrite>SRP_1,*CLS</srpwrite>
+		<delay>1000</delay>
+		<display>DMM Model : </display>
+		<srpread>SRP_1,*IDN?,[*NA*],5000,show</srpread>
+		<delay>1000</delay>	
+		<chkinword>SRP_1,34970A,failstop</chkinword>
+	</test>
+	<test tname="UUT's 12V current measurement">
+		<display>12V Current : </display>
+		<srpread>SRP_1,MEAS:VOLT:DC? (@101),[*NA*],500,show_Amp.</srpread>	
+		<chkvalue>SRP_1,0.3_0.5,failstop</chkvalue>
+	</test>
+	<test tname="UUT's 3.3V current measurement">
+		<display>3.3V Current : </display>
+		<srpread>SRP_1,MEAS:VOLT:DC? (@102),[*NA*],500,show_Amp.</srpread>
+		<chkvalue>SRP_1,0.1_0.2,failstop</chkvalue>
+	</test>
+	<!--
+	<test tname="Login to Linux">
+		<use>SRP_0,read,,[root@localhost ~]#  ,60000,show</use>	
+		<check>SRP_0,inword,[root@localhost ~]#,failstop</check>
+	</test>
+	-->
+	<test tname="PCI-e List Check">
+		<srpread>SRP_0,lspci -vv -s 01:00.0,[root@localhost ~]#,60000,show</srpread>
+		<display>Device Name : (USB controller, Texas Instruments)</display>
+		<chkinword>SRP_0,USB controller: Texas Instruments,failstop</chkinword>
+		<display>Device ID : (8241)</display>
+		<check>SRP_0,inword,Device 8241,failstop</check>
+		<display>Target Link Speed : (5GT/s) </display>
+		<check>SRP_0,inword,Target Link Speed: 5GT/s,failstop</check>
+	</test>
+	<test tname="Channel 1 Speed test">
+		<use>SRP_0,read,hdparm -t /dev/sdb,[root@localhost ~]#,60000,show</use>
+		<check>SRP_0,valueinline,Timing buffered disk reads:  [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,70_77</check>
+	</test>
+	<test tname="Channel 2 Speed test">
+		<use>SRP_0,read,hdparm -t /dev/sdc,[root@localhost ~]#,60000,show</use>
+		<check>SRP_0,valueinline,Timing buffered disk reads:  [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,70_77</check>
+	</test>
+	<test tname="Channel 3 Speed test">
+		<use>SRP_0,read,hdparm -t /dev/sdd,[root@localhost ~]#,60000,show</use>
+		<check>SRP_0,valueinline,Timing buffered disk reads:  [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,70_77</check>
+	</test>
+	<test tname="Channel 4 Speed test">
+		<use>SRP_0,read,hdparm -t /dev/sde,[root@localhost ~]#,60000,show</use>
+		<check>SRP_0,valueinline,Timing buffered disk reads:  [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,70_77</check>
+		<use>SRP_0,write,poweroff</use>
+		<display>Shutting down RHEL... 1 min.</display>
+		<use>DELAY,60000</use>		
+	</test>
+	<posttest tname="ODC Upload">
+		<gethttp>odccheck,post,http://10.196.4.48/ibm_se/result.asp,(*ODCXML*)</gethttp>
+		<chkinword>odccheck,SUCCESS</chkinword>
+	</posttest>
+</maintest>

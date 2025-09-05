@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<usage>
+	<channel number="0">
+		<use>SRP0,7,9600,8,N,1</use>
+	</channel>
+</usage>

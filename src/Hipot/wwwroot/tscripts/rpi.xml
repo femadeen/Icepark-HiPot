@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+	<theader tname="Raspberry Pi">
+	  <trevision>1.0</trevision>
+	  <tdescription>Raspberry Pi Functional Card Test.</tdescription>
+	  <towner>Somsak Bo.</towner>
+	</theader>	
+	<test tname="RPI DF Check 0">
+		<srcwonly>SRC_0,*RST,[*CRLF*]</srcwonly>
+		<delay>1000</delay>
+		<srcwonly>SRC_0,*CLS,[*CRLF*]</srcwonly>
+		<delay>1000</delay>
+		<display>(*SRCID_0*),[*enter*]</display>
+		<srcwonly>SRP_0,MEAS:FREQ? (@(*SRCID_0*)),[*CRLF*]</srcwonly>	
+		<display>Frequency : ,[*NA*]</display>
+		<delay>2000</delay>		
+		<srcronly>SRC_0</srcronly>
+		<chkvalue>SRC_0,0_10000000000,failcont</chkvalue>
+	</test>	
+</maintest>

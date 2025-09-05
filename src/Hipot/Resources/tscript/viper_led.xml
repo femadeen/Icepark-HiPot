@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+	<theader tname="VIPER LED TEST">
+		  <trevision>1.0</trevision>
+		  <tdescription>VIPER LED Test.</tdescription>
+		  <towner>Sudjai Mu.</towner>
+	</theader>	
+
+	<test tname="VIPER FAULT LED ON">
+		<srpwonly>SRP_0,*CLS,[*CRLF*]</srpwonly>
+		<delay>500</delay>	
+		<srpwonly>SRP_0,MEAS:FREQ? (@101),[*CRLF*]</srpwonly>
+		<display>Frequency Reading1 : ,[*NA*]</display>
+        <delay>2000</delay>	 		
+		<srpronly>SRP_0</srpronly>
+		<delay>1000</delay>
+		<chkvalue>SRP_0,+1.00E+03_+1.80E+03,failcont</chkvalue>
+		<delay>500</delay>	
+		<srpwonly>SRP_0,MEAS:FREQ? (@101),[*CRLF*]</srpwonly>
+		<display>Frequency Reading2 : ,[*NA*]</display>
+        <delay>2000</delay>	 		
+		<srpronly>SRP_0</srpronly>
+		<delay>1000</delay>
+		<chkvalue>SRP_0,+1.00E+03_+1.80E+03,failcont</chkvalue>
+	</test> 
+	
+
+</maintest>

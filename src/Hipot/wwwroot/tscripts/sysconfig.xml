@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sysconfig>
+	<tester tid="RACK-CTH-HIPOT-01">
+		<testertype>RACK-CTH-HIPOT-01</testertype>
+		<startdate></startdate>		
+	</tester>	
+</sysconfig>

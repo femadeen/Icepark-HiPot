@@ -1,27 +1,212 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Hipot</a>
+﻿@using Hipot.Data
+
+@inject AppState AppState
+@inject NavigationManager NavigationManager
+
+<div class="top-nav">
+    <div class="nav-brand">
+        <span class="nav-title">Icepark-HiPot</span>
+    </div>
+
+    <div class="nav-links">
+        <a class="nav-link @(IsActive("/") ? "active" : "")" href="/">
+            <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+            </svg>
+            <span>Home</span>
+        </a>
+
+        <a class="nav-link @(IsActive("/about") ? "active" : "")" href="/about">
+            <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z" />
+            </svg>
+            <span>About</span>
+        </a>
+    </div>
+
+    <div class="nav-user">
+        @if (AppState.CurrentUser != null)
+        {
+            <div class="user-info">
+                <span>Welcome, @AppState.CurrentUser.UserName</span>
+            </div>
+
+            <button class="logout-button" @onclick="Logout">
+                <svg class="nav-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+                </svg>
+                <span>Logout</span>
+            </button>
+        }
     </div>
 </div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<style>
+    .top-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #ffffff;
+        padding: 0 2rem;
+        height: 60px;
+        border-bottom: 2px solid rgba(220, 38, 38, 0.1);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
+    .nav-brand {
+        display: flex;
+        align-items: center;
+    }
+
+    .nav-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.02em;
+    }
+
+    .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        text-decoration: none;
+        color: #64748b;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+
+        .nav-link:hover {
+            background: rgba(220, 38, 38, 0.05);
+            color: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .nav-link.active {
+            background: rgba(220, 38, 38, 0.1);
+            color: #dc2626;
+            border: 2px solid rgba(220, 38, 38, 0.2);
+        }
+
+    .nav-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    .nav-user {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .user-info {
+        background: rgba(220, 38, 38, 0.1);
+        padding: 0.5rem 1rem;
+        border-radius: 16px;
+        font-weight: 500;
+        color: #64748b;
+    }
+
+    .logout-button {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        color: white;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(220, 38, 38, 0.1);
+    }
+
+        .logout-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(220, 38, 38, 0.2);
+        }
+
+        .logout-button:active {
+            transform: translateY(0);
+        }
+
+    /* Dark mode support */
+    @@media (prefers-color-scheme: dark) {
+        .top-nav {
+            background: rgba(30, 41, 59, 0.95);
+            border-bottom: 2px solid rgba(220, 38, 38, 0.2);
+        }
+
+        .nav-link {
+            color: #94a3b8;
+        }
+
+            .nav-link:hover {
+                background: rgba(220, 38, 38, 0.1);
+                color: #f87171;
+            }
+
+            .nav-link.active {
+                background: rgba(220, 38, 38, 0.2);
+                color: #f87171;
+                border: 2px solid rgba(220, 38, 38, 0.3);
+            }
+
+        .user-info {
+            background: rgba(220, 38, 38, 0.2);
+            color: #cbd5e1;
+        }
+    }
+
+    /* Responsive design */
+    @@media (max-width: 768px) {
+        .top-nav {
+            padding: 0 1rem;
+            flex-wrap: wrap;
+            height: auto;
+            min-height: 60px;
+        }
+
+        .nav-links {
+            order: 3;
+            width: 100%;
+            padding: 0.5rem 0;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            padding: 0.5rem 0.75rem;
+            font-size: 0.9rem;
+        }
+
+        .nav-icon {
+            width: 18px;
+            height: 18px;
+        }
+    }
+</style>
+
+@code {
+    private void Logout()
+    {
+        AppState.CurrentUser = null;
+        NavigationManager.NavigateTo("/login");
+    }
+
+    private bool IsActive(string path)
+    {
+        return NavigationManager.ToBaseRelativePath(NavigationManager.Uri) == path.Trim('/');
+    }
+}

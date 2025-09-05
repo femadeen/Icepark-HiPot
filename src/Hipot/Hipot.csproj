@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
         <TargetFrameworks>net9.0-android;net9.0-ios;net9.0-maccatalyst</TargetFrameworks>
@@ -61,7 +61,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.8" />
         <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
         <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Maui" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.5" />
@@ -69,6 +68,18 @@
 		<PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
 		<PackageReference Include="System.IO.Ports" Version="8.0.0" />
 		<PackageReference Include="MudBlazor" Version="6.19.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Hipot.Data\Hipot.Data.csproj" />
+    </ItemGroup>
+	 <ItemGroup>
+      <Folder Include="wwwroot\tscripts\" />
+    </ItemGroup>
+  <ItemGroup>
+      <MauiAsset Include="Resources\tscript\main.xml" />
+      <MauiAsset Include="Resources\tscript\main_usage.xml" />
+      <MauiAsset Include="Resources\tscript\user.xml" />
     </ItemGroup>
 
 </Project>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mainuser>
+	<user uen="00090541">
+		<userlevel>0</userlevel>
+		<username>ADMIN</username>
+		<password>admin</password>
+	</user>
+	<user uen="us62021266">
+		<userlevel>0</userlevel>
+		<username>Femi Edun K</username>
+		<password>testing</password>
+	</user>	
+</mainuser>

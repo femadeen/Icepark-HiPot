@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+	<theader tname="Raspberry Pi">
+	  <trevision>1.0</trevision>
+	  <tdescription>Raspberry Pi Functional Card Test.</tdescription>
+	  <towner>Somsak Bo.</towner>
+	</theader>	
+	<test tname="RPI DF Check 0">
+		<srpwonly>SRP_0,[*enter*]</srpwonly>
+		<delay>1000</delay>
+		<srpronly>SRP_0</srpronly>
+		<srpwrchk>SRP_0,df,pi@raspberrypi:~$,10</srpwrchk>		
+		<chkinword>SRP_0,/dev/mmcblk0p11,failcont</chkinword>
+	</test>
+	<test tname="RPI DF Check 1">
+		<srpwonly>SRP_0,[*enter*]</srpwonly>
+		<delay>1000</delay>
+		<srpronly>SRP_0</srpronly>
+		<srpwrchk>SRP_0,df,pi@raspberrypi:~$,10</srpwrchk>		
+		<chkinword>SRP_0,/dev/mmcblk0p1,failcont,[*ctl+c*]</chkinword>
+	</test>
+	<test tname="RPI DF Check 2">
+		<srpwonly>SRP_0,[*enter*]</srpwonly>
+		<delay>1000</delay>
+		<srpronly>SRP_0</srpronly>
+		<srpwrchk>SRP_0,df,pi@raspberrypi:~$,10</srpwrchk>		
+		<chkinword>SRP_0,/dev/mmcblk0p1,failcont</chkinword>
+	</test>	
+	
+	<test tname="LED Check">
+		<message>Test message!!!,critical</message>
+		<humanjudge>Do you see the LED light as the shown picture?,D:\Proj\Pekasuz3\Pekasuz3\bin\Debug\pekimg\led.jpg,zoom,failstop</humanjudge>
+	</test>
+	
+	<test tname="RPI DF VALUE TEST">
+		<srpwonly>SRP_0,[*enter*]</srpwonly>
+		<delay>1000</delay>		
+		<srpronly>SRP_0</srpronly>
+		<srpwrchk>SRP_0,df,pi@raspberrypi:~$,60000</srpwrchk>	
+		
+		<getvalueinline>VAR,SRP_0,/dev/mmcblk0p1     [*X*]   [*Q*]     [*X*]  33% /boot</getvalueinline>
+		<display>(*VAR*),[*enter*]</display>
+		<apfile>c:\test_sak.txt,(*VAR*)</apfile>
+		<rdfile>VAR2,c:\test_sak.txt,(*VAR*)</rdfile>
+		<display>(*VAR2*),[*enter*]</display>
+		
+		<chkvalueinline>SRP_0,/dev/mmcblk0p1     [*X*]   [*Q*]     [*X*]  33% /boot,17000_20000,failcont</chkvalueinline>
+	</test>
+</maintest>

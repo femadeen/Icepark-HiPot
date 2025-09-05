@@ -1,0 +1,733 @@
+<PROJECT><PROJECT_NAME>Penguin</PROJECT_NAME>
+<DATA>
+
+<!-- ========== Penguin Contacts ==========================================
+     Firmware: Brad Grupczynski
+     EC Owner/Design Engineer: Scott J. Fritton T/L 253-1050
+     PQE: Mike Schwenker T/L 845-433-4672
+     Program Owner: Meg Curry
+     ====================================================================== -->
+
+<!-- ====================================================================== -->
+<!-- ========== Penguin L31 =============================================== -->
+<!-- ====================================================================== -->
+<!-- 
+PENGUIN L31, EC L38221
+BARCODE: "11S 00E8377 Y L1 0xx ymd sss"
+HARDWARE VERSION: 0x00000300
+CHANGES: Rev D proc, preprog parts refresh, new mech, New SSDs 256b encryption
+
+New PNs:
+00E8378 Penguin VPD
+00E8379 Honeoye VPD
+00E8380 Card Assembly
+00E8381 VegaPro Flash - Revision: 2504
+00E8382 Expander Flash - Revision: 0115
+
+00E8383 Penguin Flash - 
+> /iop/m10.minn/cur/gen/test.gtcm/ioa/flash/TlBuildFlash.exe -b /iop/m10.minn/bld/gen/ibmLE.pgm/ioa/flash/IfBootPeregrine2_HC.out -d /afs/rch/usr7/vraidbld/images/vraid/GA2_Main_Release/ibmsis50_130227.img -o /tmp/Peregrine2
+Reading boot image,"/iop/m10.minn/bld/gen/ibmLE.pgm/ioa/flash/IfBootPeregrine2_HC.out"
+Boot timestamp: 130311205853
+Boot MSL: 03500032
+00E8928 sis50VRAIDrevD
+
+Preprogrammed Images
+Description         Old PN  New PN  Owner
+Penguin Flash       00E7959 00E8383 Grupczynski
+Penguin SES VPD     00E7952 00E8378 Fritton
+SAS Expander Flash  00E7958 00E8382 Grupczynski	
+VegaPro Flash       00E7957 00E8381 Grupczynski	
+Penguin-H VPD       00E7953 00E8379 Fernekes
+
+74Y4919 Test Group
+sis50 VRAID Rev D   00E8928 00e8928_a1d00350.img,  ver=revd, eyecat=03500032
+Expander            00E7084 00e7084_a1700deb.img,  ver=0115, eyecat=0A000115
+Vega/SSD Combo      74Y7424 74y7424_a1d00d99c.img, ver=0QK0, eyecat=0A130326
+SSD Provisioning    00E7354 00E7354_a1d00d99p.img, ver=0QK0, eyecat=0A130327
+MBATs Driver        42R7568 MsMinn30_LeakDetect_04303007.img, no-change, a17002ff
+CRoC Test Segment   74Y7358 MsMinnMbatBanana_03MSL.img, no-change
+-->
+
+<CARD>
+<NAME>Penguin_L31</NAME>
+    <ALLOW>
+        <PN>00E8377</PN><USAGE>A</USAGE><EC>0:Z</EC>  <!-- [YL<usage><ec>] (usage A=any, ec 0:Z) -->
+        <!-- Hdw revision written at fct, digit before colon must match ec digit (ie, 2 in YL12) -->
+        <VAR><VARNAME>HWrevhex</VARNAME><VARVALUE>0:00000300, 1:00000300, 2:00000300, 8:00000300</VARVALUE></VAR>
+        <VAR><VARNAME>BootName</VARNAME><VARVALUE>IfBootPeregrine2</VARVALUE></VAR>
+        <VAR><VARNAME>LASTHEXCOUNT</VARNAME><VARVALUE>0</VARVALUE></VAR> <!-- 0 = allow non-hex chars in SN -->
+        <VAR><VARNAME>VPD</VARNAME><VARVALUE>00E8379</VARVALUE></VAR>
+    </ALLOW>
+
+    <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+    <TEST>
+        <TEST_SUFFIX>0</TEST_SUFFIX>
+        <MAINTEST>/usr/local/efct/testfiles/penguin/penguin.pl</MAINTEST>
+        <MAINTEST_NAME>Penguin</MAINTEST_NAME>
+        <HELP>/usr/local/efct/testfiles/penguin/help.htm</HELP>
+        <FIT>N</FIT>
+
+        <!-- LEFT -->
+        <POSITION><INDEX>0</INDEX><FIT_REF/><REQUIRED>N</REQUIRED>
+        <POS_NAME>Penguin_L31</POS_NAME>
+        <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+        <POS_IMAGE><POS_IMAGE_FILENAME>/usr/local/efct/testfiles/penguin/penguin.jpg</POS_IMAGE_FILENAME>
+        <POS_IMAGE_TLX>1</POS_IMAGE_TLX><POS_IMAGE_TLY>1</POS_IMAGE_TLY>
+        <POS_IMAGE_BRX>1</POS_IMAGE_BRX><POS_IMAGE_BRY>1</POS_IMAGE_BRY></POS_IMAGE>
+        </POSITION>
+
+        <!-- RIGHT -->
+        <POSITION><INDEX>1</INDEX><FIT_REF/><REQUIRED>N</REQUIRED>
+        <POS_NAME>Penguin_L31</POS_NAME>
+        <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+        <POS_IMAGE><POS_IMAGE_FILENAME>/usr/local/efct/testfiles/penguin/penguin.jpg</POS_IMAGE_FILENAME>
+        <POS_IMAGE_TLX>1</POS_IMAGE_TLX><POS_IMAGE_TLY>1</POS_IMAGE_TLY>
+        <POS_IMAGE_BRX>1</POS_IMAGE_BRX><POS_IMAGE_BRY>1</POS_IMAGE_BRY></POS_IMAGE>
+        </POSITION>
+        
+        <ALT_TEST>
+           <MENU_NAME>Force banana update</MENU_NAME> <COMMAND_LINE>force</COMMAND_LINE>
+        </ALT_TEST>
+    </TEST>
+
+    <!-- ========== OPTIONS =============================================== -->
+    <VAR><VARNAME>do_ssd_test</VARNAME><VARVALUE>Y</VARVALUE></VAR>
+    <VAR><VARNAME>do_loopback_test</VARNAME><VARVALUE>Y</VARVALUE></VAR>
+    
+    <!-- ========== BANANA DOWNLOAD CODE ================================== -->
+    <VAR><VARNAME>driver_lid_ver_file</VARNAME> <!-- CANT update offset 8   -->
+    <VARVALUE>a1d002ff : 04303007 : MsMinn30_LeakDetect_04303007.img</VARVALUE></VAR>
+
+    <!-- ========== BOOT/FLASH CODE ======================================= -->
+    <!-- Can update offset 8, if not diff than prev then banana wont update -->    
+    <VAR><VARNAME>boot_lid_ver_file</VARNAME>
+    <VARVALUE>a1d002fe : 0000FFFD : MsMinnMbatBanana_03MSL.img</VARVALUE></VAR>
+    <VAR><VARNAME>Bootstrap</VARNAME><VARVALUE>b80d504ae800020000002030c3001380</VARVALUE></VAR>
+    
+    <!-- ========== IOA/VRAID CODE (ibmsis50.img) ========================= -->
+    <VAR><VARNAME>ibmsis50_lid_ver_file</VARNAME> <!-- extdl var uppercase -->
+    <VARVALUE>a1d00350 : 03500032 : 00e8928_a1d00350.img</VARVALUE></VAR>
+    <VAR><VARNAME>ibmsis50_EXTDL</VARNAME><VARVALUE>03500032</VARVALUE></VAR>
+
+    <!-- ========== FPGA CODE ============================================= -->
+    <!-- Per John Horvath sametime 5/25/2012: The MSMinn30 code looks through
+    the MsMinnMbatBanana.img for the correct boot based on card type and chip
+    pass. The true hard copy has a different chip pass and picks up a different
+    boot. That boot is 1 second earlier then the soft copy boot. -->
+    <VAR><VARNAME>fpga_lid_ver_file</VARNAME>
+    <VARVALUE>a1d0037c : 11201301 : 00E6376.BIN</VARVALUE></VAR>
+    <VAR><VARNAME>CrocLevel</VARNAME><VARVALUE>13201261</VARVALUE></VAR> <!-- HC -->
+    <VAR><VARNAME>IfBootPeregrine2_Timestamp</VARNAME><VARVALUE>121008132755</VARVALUE></VAR> <!-- MsMinnMbatBanana_03MSL.img -->
+
+    <!-- ========== VEGA & SSD CODE ======================================= -->
+    <!-- parm1 always a1700d99, parm2 is from offset 8 in the file, CAN update -->
+    <!-- Must load drive code first then load provisioning table -->
+    <!-- Load combo image then prov image -->
+    <VAR><VARNAME>vega_fw_lid_ver_file</VARNAME>
+    <VARVALUE>a1700d99 : 0A130326 : 74y7424_a1d00d99c.img</VARVALUE></VAR>
+    <VAR><VARNAME>vega_pt_lid_ver_file</VARNAME>
+    <VARVALUE>a1700d99 : 0A130327 : 00E7354_a1d00d99p.img</VARVALUE></VAR>  
+    <VAR><VARNAME>Vega_Level</VARNAME><VARVALUE>0Q</VARVALUE></VAR>
+    <VAR><VARNAME>Ssd_Level</VARNAME><VARVALUE>K0</VARVALUE></VAR>
+    
+    <!-- ========== MAXIM SAS EXPANDER CODE =============================== -->
+    <VAR><VARNAME>expFw_lid_ver_file</VARNAME> <!-- can update offset 8 -->
+    <VARVALUE>a1700deb : 0A000115 : 00e7084_a1700deb.img</VARVALUE></VAR>
+    <VAR><VARNAME>Exp_Level</VARNAME><VARVALUE>0115</VARVALUE></VAR>
+
+    <VAR><VARNAME>MainWwidOffsetByte</VARNAME><VARVALUE>40</VARVALUE></VAR>
+    <VAR><VARNAME>WWIDqtydword</VARNAME><VARVALUE>00000020</VARVALUE></VAR>
+    <VAR><VARNAME>ImageName</VARNAME><VARVALUE>ibmsis50</VARVALUE></VAR>
+</CARD> 
+
+<!-- ====================================================================== -->
+<!-- ========== Penguin L30 =============================================== -->
+<!-- ====================================================================== -->
+<!-- PENGUIN L30 L38061, 11S00E7951YL10 
+     00E7083 = IOA 03500028
+     74Y7424 = 0NJU
+     00E7354 = Provisioning Table for 0NJU
+     00E7952 = VPD PGRINEXZ.U2 (penguin vpd)
+     00E7953 = VPD U1VPD (honeoye vpd)
+     
+     MIF 00E7959, MIF EC: L38061
+     Unprogrammed module part number: 78P2445
+     Part name: Peregrine-2 (VRAID True HC FPGA) 64 MB Flash image
+     /afs/rch/usr7/vraidbld/images/vraid/Z_GA2_Main_Delivery/ibmsis50_120912.img.03500024
+     Boot timestamp: 121008132755
+     Boot MSL: 03500024
+     Base WWID: 5005076C00000080
+     Firmware Download Level: 03500024 
+-->
+<CARD>
+<NAME>Penguin_L30</NAME>
+    <ALLOW>
+        <PN>00E7951</PN><USAGE>A</USAGE><EC>0:Z</EC>  <!-- [YL<usage><ec>] (usage A=any, ec 0:Z) -->
+        <!-- Hdw revision written at fct, digit before colon must match ec digit (ie, 2 in YL12) -->
+        <VAR><VARNAME>HWrevhex</VARNAME><VARVALUE>0:00000200, 1:00000200, 2:00000200, 8:00000200</VARVALUE></VAR>
+        <VAR><VARNAME>BootName</VARNAME><VARVALUE>IfBootPeregrine2</VARVALUE></VAR>
+        <VAR><VARNAME>LASTHEXCOUNT</VARNAME><VARVALUE>0</VARVALUE></VAR> <!-- 0 = allow non-hex chars in SN -->
+        <VAR><VARNAME>VPD</VARNAME><VARVALUE>00E7953</VARVALUE></VAR>
+    </ALLOW>
+
+    <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+    <TEST>
+        <TEST_SUFFIX>0</TEST_SUFFIX>
+        <MAINTEST>/usr/local/efct/testfiles/penguin/penguin.pl</MAINTEST>
+        <MAINTEST_NAME>Penguin</MAINTEST_NAME>
+        <HELP>/usr/local/efct/testfiles/penguin/help.htm</HELP>
+        <FIT>N</FIT>
+
+        <!-- LEFT -->
+        <POSITION><INDEX>0</INDEX><FIT_REF/><REQUIRED>N</REQUIRED>
+        <POS_NAME>Penguin_L30</POS_NAME>
+        <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+        <POS_IMAGE><POS_IMAGE_FILENAME>/usr/local/efct/testfiles/penguin/penguin.jpg</POS_IMAGE_FILENAME>
+        <POS_IMAGE_TLX>1</POS_IMAGE_TLX><POS_IMAGE_TLY>1</POS_IMAGE_TLY>
+        <POS_IMAGE_BRX>1</POS_IMAGE_BRX><POS_IMAGE_BRY>1</POS_IMAGE_BRY></POS_IMAGE>
+        </POSITION>
+
+        <!-- RIGHT -->
+        <POSITION><INDEX>1</INDEX><FIT_REF/><REQUIRED>N</REQUIRED>
+        <POS_NAME>Penguin_L30</POS_NAME>
+        <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+        <POS_IMAGE><POS_IMAGE_FILENAME>/usr/local/efct/testfiles/penguin/penguin.jpg</POS_IMAGE_FILENAME>
+        <POS_IMAGE_TLX>1</POS_IMAGE_TLX><POS_IMAGE_TLY>1</POS_IMAGE_TLY>
+        <POS_IMAGE_BRX>1</POS_IMAGE_BRX><POS_IMAGE_BRY>1</POS_IMAGE_BRY></POS_IMAGE>
+        </POSITION>
+        
+        <ALT_TEST>
+           <MENU_NAME>Force banana update</MENU_NAME> <COMMAND_LINE>force</COMMAND_LINE>
+        </ALT_TEST>
+    </TEST>
+
+    <!-- ========== OPTIONS =============================================== -->
+    <VAR><VARNAME>do_ssd_test</VARNAME><VARVALUE>Y</VARVALUE></VAR>
+    <VAR><VARNAME>do_loopback_test</VARNAME><VARVALUE>Y</VARVALUE></VAR>
+    
+    <!-- ========== BANANA DOWNLOAD CODE ================================== -->
+    <VAR><VARNAME>driver_lid_ver_file</VARNAME> <!-- CANT update offset 8   -->
+    <VARVALUE>a1d002ff : 04303007 : MsMinn30_LeakDetect_04303007.img</VARVALUE></VAR>
+
+    <!-- ========== BOOT/FLASH CODE ======================================= -->
+    <!-- Can update offset 8, if not diff than prev then banana wont update -->    
+    <VAR><VARNAME>boot_lid_ver_file</VARNAME>
+    <VARVALUE>a1d002fe : 0000FFFD : MsMinnMbatBanana_03MSL.img</VARVALUE></VAR>
+    <VAR><VARNAME>Bootstrap</VARNAME><VARVALUE>b80d504ae800020000002030c3001380</VARVALUE></VAR>
+    
+    <!-- ========== IOA/VRAID CODE (ibmsis50.img) ========================= -->
+    <VAR><VARNAME>ibmsis50_lid_ver_file</VARNAME> <!-- extdl var uppercase -->
+    <VARVALUE>a1d00350 : 03500028 : ibmsis50_03500028.img</VARVALUE></VAR>
+    <VAR><VARNAME>ibmsis50_EXTDL</VARNAME><VARVALUE>03500028</VARVALUE></VAR>
+
+    <!-- ========== FPGA CODE ============================================= -->
+    <!-- Per John Horvath sametime 5/25/2012: The MSMinn30 code looks through
+    the MsMinnMbatBanana.img for the correct boot based on card type and chip
+    pass. The true hard copy has a different chip pass and picks up a different
+    boot. That boot is 1 second earlier then the soft copy boot. -->
+    <VAR><VARNAME>fpga_lid_ver_file</VARNAME>
+    <VARVALUE>a1d0037c : 11201301 : 00E6376.BIN</VARVALUE></VAR>
+    <VAR><VARNAME>CrocLevel</VARNAME><VARVALUE>13201261</VARVALUE></VAR> <!-- HC -->
+    <VAR><VARNAME>IfBootPeregrine2_Timestamp</VARNAME><VARVALUE>121008132755</VARVALUE></VAR> <!-- MsMinnMbatBanana_03MSL.img -->
+    
+    <!-- ========== VEGA & SSD CODE ======================================= -->
+    <!-- parm1 always a1700d99, parm2 is from offset 8 in the file, CAN update -->
+    <!-- Must load drive code first then load provisioning table -->
+    <!-- Load VP_SSD_0KJM.img then load VP_SSD_P_0KJM.img-->
+    <VAR><VARNAME>vega_fw_lid_ver_file</VARNAME>
+    <VARVALUE>a1700d99 : 0A000924 : VP_SSD_0NJU.img</VARVALUE></VAR>
+    <VAR><VARNAME>vega_pt_lid_ver_file</VARNAME>
+    <VARVALUE>a1700d99 : 0A010924 : VP_SSD_P_0NJU.img</VARVALUE></VAR>  
+    <VAR><VARNAME>Vega_Level</VARNAME><VARVALUE>0N</VARVALUE></VAR>
+    <VAR><VARNAME>Ssd_Level</VARNAME><VARVALUE>JU</VARVALUE></VAR>
+    
+    <!-- ========== MAXIM SAS EXPANDER CODE =============================== -->
+    <VAR><VARNAME>expFw_lid_ver_file</VARNAME> <!-- can update offset 8 -->
+    <VARVALUE>a1700deb : 0A000112 : PE_0112.img</VARVALUE></VAR>
+    <VAR><VARNAME>Exp_Level</VARNAME><VARVALUE>0112</VARVALUE></VAR>
+
+    <VAR><VARNAME>MainWwidOffsetByte</VARNAME><VARVALUE>40</VARVALUE></VAR>
+    <VAR><VARNAME>WWIDqtydword</VARNAME><VARVALUE>00000020</VARVALUE></VAR>
+    <VAR><VARNAME>ImageName</VARNAME><VARVALUE>ibmsis50</VARVALUE></VAR>
+</CARD> 
+
+<!-- ====================================================================== -->
+<!-- ========== Penguin L22 =============================================== -->
+<!-- ====================================================================== -->
+<!-- PENGUIN L22 L38031, 11S00E7851YL10, vraid = 00E7083, exp = 00E7084 -->
+<CARD>
+<NAME>Penguin_L22</NAME>
+    <ALLOW>
+        <PN>00E7851</PN><USAGE>A</USAGE><EC>0:Z</EC>  <!-- [YL<usage><ec>] (usage A=any, ec 0:Z) -->
+        <!-- Hdw revision written at fct, digit before colon must match ec digit (ie, 2 in YL12) -->
+        <VAR><VARNAME>HWrevhex</VARNAME><VARVALUE>0:00000104, 1:00000104, 2:00000104, 8:00000104</VARVALUE></VAR>
+        <VAR><VARNAME>BootName</VARNAME><VARVALUE>IfBootPeregrine2</VARVALUE></VAR>
+        <VAR><VARNAME>LASTHEXCOUNT</VARNAME><VARVALUE>0</VARVALUE></VAR> <!-- 0 = allow non-hex chars in SN -->
+        <VAR><VARNAME>VPD</VARNAME><VARVALUE>00E7854</VARVALUE></VAR>
+    </ALLOW>
+
+    <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+    <TEST>
+        <TEST_SUFFIX>0</TEST_SUFFIX>
+        <MAINTEST>/usr/local/efct/testfiles/penguin/penguin.pl</MAINTEST>
+        <MAINTEST_NAME>Penguin</MAINTEST_NAME>
+        <HELP>/usr/local/efct/testfiles/penguin/help.htm</HELP>
+        <FIT>N</FIT>
+
+        <!-- LEFT -->
+        <POSITION><INDEX>0</INDEX><FIT_REF/><REQUIRED>N</REQUIRED>
+        <POS_NAME>Penguin_L22</POS_NAME>
+        <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+        <POS_IMAGE><POS_IMAGE_FILENAME>/usr/local/efct/testfiles/penguin/penguin.jpg</POS_IMAGE_FILENAME>
+        <POS_IMAGE_TLX>1</POS_IMAGE_TLX><POS_IMAGE_TLY>1</POS_IMAGE_TLY>
+        <POS_IMAGE_BRX>1</POS_IMAGE_BRX><POS_IMAGE_BRY>1</POS_IMAGE_BRY></POS_IMAGE>
+        </POSITION>
+
+        <!-- RIGHT -->
+        <POSITION><INDEX>1</INDEX><FIT_REF/><REQUIRED>N</REQUIRED>
+        <POS_NAME>Penguin_L22</POS_NAME>
+        <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+        <POS_IMAGE><POS_IMAGE_FILENAME>/usr/local/efct/testfiles/penguin/penguin.jpg</POS_IMAGE_FILENAME>
+        <POS_IMAGE_TLX>1</POS_IMAGE_TLX><POS_IMAGE_TLY>1</POS_IMAGE_TLY>
+        <POS_IMAGE_BRX>1</POS_IMAGE_BRX><POS_IMAGE_BRY>1</POS_IMAGE_BRY></POS_IMAGE>
+        </POSITION>
+        
+        <ALT_TEST>
+           <MENU_NAME>Force banana code update</MENU_NAME> <COMMAND_LINE>force</COMMAND_LINE>
+        </ALT_TEST>        
+    </TEST>
+
+    <!-- ========== OPTIONS =============================================== -->
+    <VAR><VARNAME>do_ssd_test</VARNAME><VARVALUE>Y</VARVALUE></VAR>
+    <VAR><VARNAME>do_loopback_test</VARNAME><VARVALUE>Y</VARVALUE></VAR>
+    
+    <!-- ========== BANANA DOWNLOAD CODE ================================== -->
+    <VAR><VARNAME>driver_lid_ver_file</VARNAME> <!-- CANT update offset 8   -->
+    <VARVALUE>a1d002ff : 04303007 : MsMinn30_LeakDetect_04303007.img</VARVALUE></VAR>
+
+    <!-- ========== BOOT/FLASH CODE ======================================= -->
+    <!-- Can update offset 8, if not diff than prev then banana wont update -->    
+    <VAR><VARNAME>boot_lid_ver_file</VARNAME>
+    <VARVALUE>a1d002fe : 20120522 : MsMinnMbatBanana_20120522.img</VARVALUE></VAR>
+    <VAR><VARNAME>Bootstrap</VARNAME><VARVALUE>b80d504ae800020000002030c3001380</VARVALUE></VAR>
+    
+    <!-- ========== IOA/VRAID CODE (ibmsis50.img) ========================= -->
+    <VAR><VARNAME>ibmsis50_lid_ver_file</VARNAME> <!-- extdl var uppercase -->
+    <VARVALUE>a1d00350 : 03500028 : ibmsis50_03500028.img</VARVALUE></VAR>
+    <VAR><VARNAME>ibmsis50_EXTDL</VARNAME><VARVALUE>03500028</VARVALUE></VAR>
+
+    <!-- ========== FPGA CODE ============================================= -->
+    <!-- Per John Horvath sametime 5/25/2012: The MSMinn30 code looks through
+    the MsMinnMbatBanana.img for the correct boot based on card type and chip
+    pass. The true hard copy has a different chip pass and picks up a different
+    boot. That boot is 1 second earlier then the soft copy boot. -->
+    <VAR><VARNAME>fpga_lid_ver_file</VARNAME>
+    <VARVALUE>a1d0037c : 11201301 : 00E6376.BIN</VARVALUE></VAR>
+    <VAR><VARNAME>CrocLevel</VARNAME><VARVALUE>13201261</VARVALUE></VAR> <!-- HC -->
+    <VAR><VARNAME>IfBootPeregrine2_Timestamp</VARNAME><VARVALUE>120426085456</VARVALUE></VAR> <!-- HC -->
+    
+    <!-- ========== VEGA & SSD CODE ======================================= -->
+    <!-- parm1 always a1700d99, parm2 is from offset 8 in the file, CAN update -->
+    <!-- Must load drive code first then load provisioning table -->
+    <!-- Load VP_SSD_0KJM.img then load VP_SSD_P_0KJM.img-->
+    <VAR><VARNAME>vega_fw_lid_ver_file</VARNAME>
+    <VARVALUE>a1700d99 : 0A000924 : VP_SSD_0NJU.img</VARVALUE></VAR>
+    <VAR><VARNAME>vega_pt_lid_ver_file</VARNAME>
+    <VARVALUE>a1700d99 : 0A010924 : VP_SSD_P_0NJU.img</VARVALUE></VAR>  
+    <VAR><VARNAME>Vega_Level</VARNAME><VARVALUE>0N</VARVALUE></VAR>
+    <VAR><VARNAME>Ssd_Level</VARNAME><VARVALUE>JU</VARVALUE></VAR>
+    
+    <!-- ========== MAXIM SAS EXPANDER CODE =============================== -->
+    <VAR><VARNAME>expFw_lid_ver_file</VARNAME> <!-- can update offset 8 -->
+    <VARVALUE>a1700deb : 0A000112 : PE_0112.img</VARVALUE></VAR>
+    <VAR><VARNAME>Exp_Level</VARNAME><VARVALUE>0112</VARVALUE></VAR>
+
+    <VAR><VARNAME>MainWwidOffsetByte</VARNAME><VARVALUE>40</VARVALUE></VAR>
+    <VAR><VARNAME>WWIDqtydword</VARNAME><VARVALUE>00000020</VARVALUE></VAR>
+    <VAR><VARNAME>ImageName</VARNAME><VARVALUE>ibmsis50</VARVALUE></VAR>
+</CARD> 
+    
+<!-- ====================================================================== -->
+<!-- ========== Penguin L21 =============================================== -->
+<!-- ====================================================================== -->
+<!-- PENGUIN L21 MSL, CCIN 58C1, YL10, EC: L37953 -->
+<CARD>
+<NAME>Penguin_L21</NAME>
+    <ALLOW>
+        <PN>00E7511</PN><USAGE>A</USAGE><EC>0:Z</EC>  <!-- [YL<usage><ec>] (usage A=any, ec 0:Z) -->
+        <!-- Hdw revision written at fct, digit before colon must match ec digit (ie, 2 in YL12) -->
+        <VAR><VARNAME>HWrevhex</VARNAME><VARVALUE>0:00000103, 1:00000103, 2:00000103, 8:00000103</VARVALUE></VAR>
+        <VAR><VARNAME>BootName</VARNAME><VARVALUE>IfBootPeregrine2</VARVALUE></VAR>
+        <VAR><VARNAME>LASTHEXCOUNT</VARNAME><VARVALUE>0</VARVALUE></VAR>
+        <VAR><VARNAME>VPD</VARNAME><VARVALUE>00E7513</VARVALUE></VAR>
+    </ALLOW>
+
+    <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+    <TEST>
+        <TEST_SUFFIX>0</TEST_SUFFIX>
+        <MAINTEST>/usr/local/efct/testfiles/penguin/penguin.pl</MAINTEST>
+        <MAINTEST_NAME>Penguin</MAINTEST_NAME>
+        <HELP>/usr/local/efct/testfiles/penguin/help.htm</HELP>
+        <FIT>N</FIT>
+
+        <!-- LEFT -->
+        <POSITION><INDEX>0</INDEX><FIT_REF/><REQUIRED>N</REQUIRED>
+        <POS_NAME>Penguin_L21</POS_NAME>
+        <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+        <POS_IMAGE><POS_IMAGE_FILENAME>/usr/local/efct/testfiles/penguin/penguin.jpg</POS_IMAGE_FILENAME>
+        <POS_IMAGE_TLX>1</POS_IMAGE_TLX><POS_IMAGE_TLY>1</POS_IMAGE_TLY>
+        <POS_IMAGE_BRX>1</POS_IMAGE_BRX><POS_IMAGE_BRY>1</POS_IMAGE_BRY></POS_IMAGE>
+        </POSITION>
+
+        <!-- RIGHT -->
+        <POSITION><INDEX>1</INDEX><FIT_REF/><REQUIRED>N</REQUIRED>
+        <POS_NAME>Penguin_L21</POS_NAME>
+        <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+        <POS_IMAGE><POS_IMAGE_FILENAME>/usr/local/efct/testfiles/penguin/penguin.jpg</POS_IMAGE_FILENAME>
+        <POS_IMAGE_TLX>1</POS_IMAGE_TLX><POS_IMAGE_TLY>1</POS_IMAGE_TLY>
+        <POS_IMAGE_BRX>1</POS_IMAGE_BRX><POS_IMAGE_BRY>1</POS_IMAGE_BRY></POS_IMAGE>
+        </POSITION>
+        
+        <ALT_TEST>
+           <MENU_NAME>Force banana code update</MENU_NAME> <COMMAND_LINE>force</COMMAND_LINE>
+        </ALT_TEST>        
+    </TEST>
+
+    <!-- ========== OPTIONS =============================================== -->
+    <VAR><VARNAME>do_ssd_test</VARNAME><VARVALUE>Y</VARVALUE></VAR>
+    <VAR><VARNAME>do_loopback_test</VARNAME><VARVALUE>Y</VARVALUE></VAR>
+    
+    <!-- ========== BANANA DOWNLOAD CODE ================================== -->
+    <VAR><VARNAME>driver_lid_ver_file</VARNAME> <!-- CANT update offset 8   -->
+    <VARVALUE>a1d002ff : 04303007 : MsMinn30_LeakDetect_04303007.img</VARVALUE></VAR>
+
+    <!-- ========== BOOT/FLASH CODE ======================================= -->
+    <!-- Can update offset 8, if not diff than prev then banana wont update -->    
+    <VAR><VARNAME>boot_lid_ver_file</VARNAME>
+    <VARVALUE>a1d002fe : 20120522 : MsMinnMbatBanana_20120522.img</VARVALUE></VAR>
+    <VAR><VARNAME>Bootstrap</VARNAME><VARVALUE>b80d504ae800020000002030c3001380</VARVALUE></VAR>
+    
+    <!-- ========== IOA/VRAID CODE (ibmsis50.img) ========================= -->
+    <VAR><VARNAME>ibmsis50_lid_ver_file</VARNAME> <!-- extdl var uppercase -->
+    <VARVALUE>a1d00350 : 03500028 : ibmsis50_03500028.img</VARVALUE></VAR>
+    <VAR><VARNAME>ibmsis50_EXTDL</VARNAME><VARVALUE>03500028</VARVALUE></VAR>
+    
+    <!-- for AA code for the 5 reworked cards -->
+    <!-- <VARVALUE>a1d00350 : 035000db : ibmsis50_121207_NOT_FOR_RELEASE.img</VARVALUE></VAR> -->
+    <!-- <VAR><VARNAME>ibmsis50_EXTDL</VARNAME><VARVALUE>035000DB</VARVALUE></VAR> -->
+
+    <!-- ========== FPGA CODE ============================================= -->
+    <!-- Per John Horvath sametime 5/25/2012: The MSMinn30 code looks through
+    the MsMinnMbatBanana.img for the correct boot based on card type and chip
+    pass. The true hard copy has a different chip pass and picks up a different
+    boot. That boot is 1 second earlier then the soft copy boot. -->
+    <VAR><VARNAME>fpga_lid_ver_file</VARNAME>
+    <VARVALUE>a1d0037c : 11201301 : 00E6376.BIN</VARVALUE></VAR>
+    <VAR><VARNAME>CrocLevel</VARNAME><VARVALUE>13201261</VARVALUE></VAR> <!-- HC -->
+    <VAR><VARNAME>IfBootPeregrine2_Timestamp</VARNAME><VARVALUE>120426085456</VARVALUE></VAR> <!-- HC -->
+    
+    <!-- ========== VEGA & SSD CODE ======================================= -->
+    <!-- parm1 always a1700d99, parm2 is from offset 8 in the file, CAN update -->
+    <!-- Must load drive code first then load provisioning table -->
+    <!-- Load VP_SSD_0KJM.img then load VP_SSD_P_0KJM.img-->
+    <VAR><VARNAME>vega_fw_lid_ver_file</VARNAME>
+    <VARVALUE>a1700d99 : 0A000924 : VP_SSD_0NJU.img</VARVALUE></VAR>
+    <VAR><VARNAME>vega_pt_lid_ver_file</VARNAME>
+    <VARVALUE>a1700d99 : 0A010924 : VP_SSD_P_0NJU.img</VARVALUE></VAR>  
+    <VAR><VARNAME>Vega_Level</VARNAME><VARVALUE>0N</VARVALUE></VAR>
+    <VAR><VARNAME>Ssd_Level</VARNAME><VARVALUE>JU</VARVALUE></VAR>
+
+    <!-- ========== MAXIM SAS EXPANDER CODE =============================== -->
+    <VAR><VARNAME>expFw_lid_ver_file</VARNAME> <!-- can update offset 8 -->
+    <VARVALUE>a1700deb : 0A000112 : PE_0112.img</VARVALUE></VAR>
+    <VAR><VARNAME>Exp_Level</VARNAME><VARVALUE>0112</VARVALUE></VAR>
+
+    <VAR><VARNAME>MainWwidOffsetByte</VARNAME><VARVALUE>40</VARVALUE></VAR>
+    <VAR><VARNAME>WWIDqtydword</VARNAME><VARVALUE>00000020</VARVALUE></VAR>
+    <VAR><VARNAME>ImageName</VARNAME><VARVALUE>ibmsis50</VARVALUE></VAR>
+</CARD>     
+
+<!-- ====================================================================== -->
+<!-- ========== Penguin L20 =============================================== -->
+<!-- ====================================================================== -->
+<!-- PENGUIN L20, CCIN 58C1, STB 5-27?, 11S 00E6092 YL10, EC: L37321 -->
+<!-- New code released on EC L37321D, 11S 00E6092 Y L1 2xx ymd sss -->
+<CARD>
+<NAME>Penguin_L20</NAME>
+    <ALLOW>
+        <PN>00E6092</PN><USAGE>A</USAGE><EC>0:Z</EC>  <!-- [YL<usage><ec>] (usage A=any, ec 0:Z) -->
+        <!-- Hdw revision written at fct, digit before colon must match ec digit (ie, 2 in YL12) -->
+        <VAR><VARNAME>HWrevhex</VARNAME><VARVALUE>0:00000102, 1:00000102, 2:00000102, 8:00000102</VARVALUE></VAR>
+        <VAR><VARNAME>BootName</VARNAME><VARVALUE>IfBootPeregrine2</VARVALUE></VAR>
+        <VAR><VARNAME>LASTHEXCOUNT</VARNAME><VARVALUE>0</VARVALUE></VAR>
+        <VAR><VARNAME>VPD</VARNAME><VARVALUE>00E6094</VARVALUE></VAR>
+    </ALLOW>
+
+    <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+    <TEST>
+        <TEST_SUFFIX>0</TEST_SUFFIX>
+        <MAINTEST>/usr/local/efct/testfiles/penguin/penguin.pl</MAINTEST>
+        <MAINTEST_NAME>Penguin</MAINTEST_NAME>
+        <HELP>/usr/local/efct/testfiles/penguin/help.htm</HELP>
+        <FIT>N</FIT>
+
+        <!-- LEFT -->
+        <POSITION><INDEX>0</INDEX><FIT_REF/><REQUIRED>N</REQUIRED>
+        <POS_NAME>Penguin_L20</POS_NAME>
+        <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+        <POS_IMAGE><POS_IMAGE_FILENAME>/usr/local/efct/testfiles/penguin/penguin.jpg</POS_IMAGE_FILENAME>
+        <POS_IMAGE_TLX>1</POS_IMAGE_TLX><POS_IMAGE_TLY>1</POS_IMAGE_TLY>
+        <POS_IMAGE_BRX>1</POS_IMAGE_BRX><POS_IMAGE_BRY>1</POS_IMAGE_BRY></POS_IMAGE>
+        </POSITION>
+
+        <!-- RIGHT -->
+        <POSITION><INDEX>1</INDEX><FIT_REF/><REQUIRED>N</REQUIRED>
+        <POS_NAME>Penguin_L20</POS_NAME>
+        <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+        <POS_IMAGE><POS_IMAGE_FILENAME>/usr/local/efct/testfiles/penguin/penguin.jpg</POS_IMAGE_FILENAME>
+        <POS_IMAGE_TLX>1</POS_IMAGE_TLX><POS_IMAGE_TLY>1</POS_IMAGE_TLY>
+        <POS_IMAGE_BRX>1</POS_IMAGE_BRX><POS_IMAGE_BRY>1</POS_IMAGE_BRY></POS_IMAGE>
+        </POSITION>
+        
+        <ALT_TEST>
+           <MENU_NAME>Force banana code update</MENU_NAME> <COMMAND_LINE>force</COMMAND_LINE>
+        </ALT_TEST>        
+    </TEST>
+
+    <!-- ========== OPTIONS =============================================== -->
+    <VAR><VARNAME>do_ssd_test</VARNAME><VARVALUE>Y</VARVALUE></VAR>
+    <VAR><VARNAME>do_loopback_test</VARNAME><VARVALUE>Y</VARVALUE></VAR>
+    
+    <!-- ========== BANANA DOWNLOAD CODE ================================== -->
+    <VAR><VARNAME>driver_lid_ver_file</VARNAME> <!-- CANT update offset 8   -->
+    <VARVALUE>a1d002ff : 04303007 : MsMinn30_LeakDetect_04303007.img</VARVALUE></VAR>
+
+    <!-- ========== BOOT/FLASH CODE ======================================= -->
+    <!-- Can update offset 8, if not diff than prev then banana wont update -->    
+    <VAR><VARNAME>boot_lid_ver_file</VARNAME>
+    <VARVALUE>a1d002fe : 20120522 : MsMinnMbatBanana_20120522.img</VARVALUE></VAR>
+    <VAR><VARNAME>Bootstrap</VARNAME><VARVALUE>b80d504ae800020000002030c3001380</VARVALUE></VAR>
+    
+    <!-- ========== IOA/VRAID CODE (ibmsis50.img) ========================= -->
+    <VAR><VARNAME>ibmsis50_lid_ver_file</VARNAME> <!-- extdl var uppercase -->
+    <VARVALUE>a1d00350 : 03500028 : ibmsis50_03500028.img</VARVALUE></VAR>
+    <VAR><VARNAME>ibmsis50_EXTDL</VARNAME><VARVALUE>03500028</VARVALUE></VAR>
+    
+    <!-- ========== FPGA CODE ============================================= -->
+    <!-- Per John Horvath sametime 5/25/2012: The MSMinn30 code looks through
+    the MsMinnMbatBanana.img for the correct boot based on card type and chip
+    pass. The true hard copy has a different chip pass and picks up a different
+    boot. That boot is 1 second earlier then the soft copy boot. -->
+    <VAR><VARNAME>fpga_lid_ver_file</VARNAME>
+    <VARVALUE>a1d0037c : 11201301 : 00E6376.BIN</VARVALUE></VAR>
+    <VAR><VARNAME>CrocLevel</VARNAME><VARVALUE>13201261</VARVALUE></VAR> <!-- HC -->
+    <VAR><VARNAME>IfBootPeregrine2_Timestamp</VARNAME><VARVALUE>120426085456</VARVALUE></VAR> <!-- HC -->
+
+    <!-- ========== VEGA & SSD CODE ======================================= -->
+    <!-- parm1 always a1700d99, parm2 is from offset 8 in the file, CAN update -->
+    <!-- Must load drive code first then load provisioning table -->
+    <!-- Load VP_SSD_0KJM.img then load VP_SSD_P_0KJM.img-->
+    <VAR><VARNAME>vega_fw_lid_ver_file</VARNAME>
+    <VARVALUE>a1700d99 : 0A000924 : VP_SSD_0NJU.img</VARVALUE></VAR>
+    <VAR><VARNAME>vega_pt_lid_ver_file</VARNAME>
+    <VARVALUE>a1700d99 : 0A010924 : VP_SSD_P_0NJU.img</VARVALUE></VAR>  
+    <VAR><VARNAME>Vega_Level</VARNAME><VARVALUE>0N</VARVALUE></VAR>
+    <VAR><VARNAME>Ssd_Level</VARNAME><VARVALUE>JU</VARVALUE></VAR>
+
+    <!-- ========== MAXIM SAS EXPANDER CODE =============================== -->
+    <VAR><VARNAME>expFw_lid_ver_file</VARNAME> <!-- can update offset 8 -->
+    <VARVALUE>a1700deb : 0A000112 : PE_0112.img</VARVALUE></VAR>
+    <VAR><VARNAME>Exp_Level</VARNAME><VARVALUE>0112</VARVALUE></VAR>
+
+    <VAR><VARNAME>MainWwidOffsetByte</VARNAME><VARVALUE>40</VARVALUE></VAR>
+    <VAR><VARNAME>WWIDqtydword</VARNAME><VARVALUE>00000020</VARVALUE></VAR>
+    <VAR><VARNAME>ImageName</VARNAME><VARVALUE>ibmsis50</VARVALUE></VAR>
+</CARD>
+
+<!-- ====================================================================== -->
+<!-- ========== Penguin L10 =============================================== -->
+<!-- ====================================================================== -->
+<!-- PENGUIN L10, CCIN 58C1, STB 4-27, 11S-00J0446-YL3, EC: L37321A  -->
+<CARD>
+<NAME>Penguin_L10</NAME>
+    <ALLOW>
+        <PN>00J0446</PN><USAGE>A</USAGE><EC>0:Z</EC>  <!-- [YL<usage><ec>] (usage A=any, ec 0:Z) -->
+        <!-- Hdw revision written at fct, digit before colon must match ec digit (ie, 2 in YL12) -->
+        <VAR><VARNAME>HWrevhex</VARNAME><VARVALUE>0:00000000, 1:00000000, 2:00000000, 8:00000000</VARVALUE></VAR>
+        <VAR><VARNAME>BootName</VARNAME><VARVALUE>IfBootPeregrine2</VARVALUE></VAR>
+        <VAR><VARNAME>LASTHEXCOUNT</VARNAME><VARVALUE>0</VARVALUE></VAR>
+        <VAR><VARNAME>VPD</VARNAME><VARVALUE>74Y1689</VARVALUE></VAR>
+    </ALLOW>
+
+    <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+    <TEST>
+        <TEST_SUFFIX>0</TEST_SUFFIX>
+        <MAINTEST>/usr/local/efct/testfiles/penguin/penguin.pl</MAINTEST>
+        <MAINTEST_NAME>Penguin</MAINTEST_NAME>
+        <HELP>/usr/local/efct/testfiles/penguin/help.htm</HELP>
+        <FIT>N</FIT>
+
+        <!-- LEFT -->
+        <POSITION><INDEX>0</INDEX><FIT_REF/><REQUIRED>N</REQUIRED>
+        <POS_NAME>Penguin_L10</POS_NAME>
+        <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+        <POS_IMAGE><POS_IMAGE_FILENAME>/usr/local/efct/testfiles/penguin/penguin.jpg</POS_IMAGE_FILENAME>
+        <POS_IMAGE_TLX>1</POS_IMAGE_TLX><POS_IMAGE_TLY>1</POS_IMAGE_TLY>
+        <POS_IMAGE_BRX>1</POS_IMAGE_BRX><POS_IMAGE_BRY>1</POS_IMAGE_BRY></POS_IMAGE>
+        </POSITION>
+
+        <!-- RIGHT -->
+        <POSITION><INDEX>1</INDEX><FIT_REF/><REQUIRED>N</REQUIRED>
+        <POS_NAME>Penguin_L10</POS_NAME>
+        <GUID><GUID_NAME>Penguin_WWID</GUID_NAME><GUID_COUNT>1</GUID_COUNT></GUID>
+        <POS_IMAGE><POS_IMAGE_FILENAME>/usr/local/efct/testfiles/penguin/penguin.jpg</POS_IMAGE_FILENAME>
+        <POS_IMAGE_TLX>1</POS_IMAGE_TLX><POS_IMAGE_TLY>1</POS_IMAGE_TLY>
+        <POS_IMAGE_BRX>1</POS_IMAGE_BRX><POS_IMAGE_BRY>1</POS_IMAGE_BRY></POS_IMAGE>
+        </POSITION>
+        
+        <ALT_TEST>
+           <MENU_NAME>Force banana code update</MENU_NAME> <COMMAND_LINE>force</COMMAND_LINE>
+        </ALT_TEST>        
+    </TEST>
+    
+    <!-- ========== OPTIONS =============================================== -->
+    <VAR><VARNAME>do_ssd_test</VARNAME><VARVALUE>Y</VARVALUE></VAR>
+    <VAR><VARNAME>do_loopback_test</VARNAME><VARVALUE>Y</VARVALUE></VAR>
+    
+    <!-- ========== BANANA DOWNLOAD CODE ================================== -->
+    <VAR><VARNAME>driver_lid_ver_file</VARNAME> <!-- CANT update offset 8   -->
+    <VARVALUE>a1d002ff : 04303007 : MsMinn30_LeakDetect_04303007.img</VARVALUE></VAR>
+
+    <!-- ========== BOOT/FLASH CODE ======================================= -->
+    <!-- Can update offset 8, if not diff than prev then banana wont update -->    
+    <VAR><VARNAME>boot_lid_ver_file</VARNAME>
+    <VARVALUE>a1d002fe : 20120522 : MsMinnMbatBanana_20120522.img</VARVALUE></VAR>
+    <VAR><VARNAME>Bootstrap</VARNAME><VARVALUE>b80d504ae800020000002030c3001380</VARVALUE></VAR>
+    
+    <!-- ========== IOA/VRAID CODE (ibmsis50.img) ========================= -->
+    <VAR><VARNAME>ibmsis50_lid_ver_file</VARNAME> <!-- extdl var uppercase -->
+    <VARVALUE>a1d00350 : 03500028 : ibmsis50_03500028.img</VARVALUE></VAR>
+    <VAR><VARNAME>ibmsis50_EXTDL</VARNAME><VARVALUE>03500028</VARVALUE></VAR>
+    
+    <!-- ========== FPGA CODE ============================================= -->
+    <!-- Per John Horvath sametime 5/25/2012: The MSMinn30 code looks through
+    the MsMinnMbatBanana.img for the correct boot based on card type and chip
+    pass. The true hard copy has a different chip pass and picks up a different
+    boot. That boot is 1 second earlier then the soft copy boot. -->
+    <VAR><VARNAME>fpga_lid_ver_file</VARNAME>
+    <VARVALUE>a1d0037c : 11201301 : 00E6376.BIN</VARVALUE></VAR>
+    <VAR><VARNAME>CrocLevel</VARNAME><VARVALUE>11201301</VARVALUE></VAR> <!-- SC -->
+    <VAR><VARNAME>IfBootPeregrine2_Timestamp</VARNAME><VARVALUE>120426085457</VARVALUE></VAR> <!-- SC -->
+    
+    <!-- ========== VEGA & SSD CODE ======================================= -->
+    <!-- parm1 always a1700d99, parm2 is from offset 8 in the file, CAN update -->
+    <!-- Must load drive code first then load provisioning table -->
+    <!-- Load VP_SSD_0KJM.img then load VP_SSD_P_0KJM.img-->
+    <VAR><VARNAME>vega_fw_lid_ver_file</VARNAME>
+    <VARVALUE>a1700d99 : 0A000924 : VP_SSD_0NJU.img</VARVALUE></VAR>
+    <VAR><VARNAME>vega_pt_lid_ver_file</VARNAME>
+    <VARVALUE>a1700d99 : 0A010924 : VP_SSD_P_0NJU.img</VARVALUE></VAR>  
+    <VAR><VARNAME>Vega_Level</VARNAME><VARVALUE>0N</VARVALUE></VAR>
+    <VAR><VARNAME>Ssd_Level</VARNAME><VARVALUE>JU</VARVALUE></VAR>
+
+    <!-- ========== MAXIM SAS EXPANDER CODE =============================== -->
+    <VAR><VARNAME>expFw_lid_ver_file</VARNAME> <!-- can update offset 8 -->
+    <VARVALUE>a1700deb : 0A000112 : PE_0112.img</VARVALUE></VAR>
+    <VAR><VARNAME>Exp_Level</VARNAME><VARVALUE>0112</VARVALUE></VAR>
+
+    <VAR><VARNAME>MainWwidOffsetByte</VARNAME><VARVALUE>40</VARVALUE></VAR>
+    <VAR><VARNAME>WWIDqtydword</VARNAME><VARVALUE>00000020</VARVALUE></VAR>
+    <VAR><VARNAME>ImageName</VARNAME><VARVALUE>ibmsis50</VARVALUE></VAR>
+      </CARD>
+   </DATA>
+   
+   <CONTROL>
+      <VENDOR>/Celestica/Conf_Disk/EFCT_TESTS</VENDOR>
+
+      <!-- PN46N2861 -->
+      <ALLOW_HOST>^([Pp][Nn]46[Nn]2861[A-Za-z]{0,3})|(smjlab20.)$</ALLOW_HOST>
+      
+      <!-- VERSIONS:
+         1.3  Add new firmware and loop-back test support
+         1.4  New fw, retry without reset on vega update per john horvath
+         1.6  New code for L20, other fixes
+         1.7  Not released
+         1.71 New code for L21, removed loopback due to firmware bug at request of dev
+         1.8  New code for L21 with fixed ssds and new logic to skip provisioning table if ssd already at right level
+         1.81 08/15/2012 Fixed step sequence (only occurs if provisioned -if using non JM drives), turned off vpd write (oops)
+         1.9  08/20/2012 New fw (exp 0112, IOA 001E), re-added loopback test
+              Fixed case where vega fw ok but ssd fw needs update, provisioning was skipped in this case
+         2.0  Support L22, fixed xml for special 8 pc build, moved loopback enable switch to xml, minor changes
+         2.1  09/05/2012 Add support for MD5, moved versioning to xml
+         2.2  09/20/2012 Changed all '04302171 : MsMinn30_04302171.img' to '04300000 : MsMinn30_20120913.img'
+                         Added drive type/provisioning check
+                         Added SSD test mbats (genesis/test/genesis)
+                         Fixed error where only first expander level was checked to determine if update required
+                         Modified EFCT_PCI_MBAT->recvmbat() to log data on mbat timeout (status & error & unitcheck blocks)
+                         New ioa code 03500028
+                         Fixed error on loopback prompt timeout, could allow test to continue (but would still fail later)
+                         Added retries on FSI link error that I see occassionally - should fix this error
+                         Added support for L30
+         2.21 10/04/2012 Modified logic for provisioning, other minor changes
+         2.22 10/08/2012 Using new banana download code that should patch the known memory leak
+         2.3  10/26/2012 Added support for other YLX (where X = any) to support YL8 RMAs
+         2.4  11/14/2012 Fix level 30 with new code from Brad
+         2.5  11/14/2012 Fix level 22 pca i2c error
+         2.6  11/26/2012 Fix hrevhex level for L30 cards ec 1, allow ec 0,1,2,8 for all hwrevhex
+         2.7  02/18/2013 Add bootstrap id check per Keith
+                         (2.7 not yet released, will probably wait for next EC)
+         2.8  03/26/2013 Added support for L31
+       -->
+      
+   <VERSION>2.8</VERSION><DATE>03/26/2013</DATE>
+   <TE>JOHNSTON</TE><TE_EMAIL>sjohns@us.ibm.com</TE_EMAIL>
+      <PACK>
+         <INCLUDE>/usr/local/efct/xml/penguin.xml</INCLUDE>
+         <INCLUDE>/usr/local/efct/xml/penguin.enc</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/penguin/penguin.pl</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/penguin/pcl.pl</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/penguin/penguin.jpg</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/penguin/peng.gif</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/penguin/help.htm</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/penguin/21OCT10_Honeoye_100D_retime.txt</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/penguin/vpd/</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/tallships/config_interface_type</INCLUDE>
+         
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Banana/MsMinn30_LeakDetect_04303007.img</INCLUDE> <!-- Banana download -->
+         <!-- <INCLUDE>/usr/local/efct/testfiles/tallships/Banana/MsMinn30_20120913.img</INCLUDE> --> <!-- Banana download -->
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Banana/MsMinnMbatBanana_20120522.img</INCLUDE> <!-- boot flash -->
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Banana/MsMinnMbatBanana_03MSL.img</INCLUDE> <!-- boot flash -->
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Banana/ibmsis50_03500028.img</INCLUDE> <!-- ioa vraid -->
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Banana/00E6376.BIN</INCLUDE> <!-- croc fpga -->
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Banana/VP_SSD_0NJU.img</INCLUDE> <!-- vega and ssd -->
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Banana/VP_SSD_P_0NJU.img</INCLUDE> <!-- provisioning -->
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Banana/PE_0112.img</INCLUDE> <!-- Maxim sas expander -->
+	 
+	 <!-- L31 -->
+	 <INCLUDE>/usr/local/efct/testfiles/tallships/Banana/00e8928_a1d00350.img</INCLUDE> <!-- vraid revd -->
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Banana/74y7424_a1d00d99c.img</INCLUDE> <!-- vega and ssd -->
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Banana/00E7354_a1d00d99p.img</INCLUDE> <!-- provisioning -->	 
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Banana/00e7084_a1700deb.img</INCLUDE> <!-- Maxim sas expander -->
+	 
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Dwacs/DWACSv35_200msTO.hex</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Dwacs/44V5275.EXE</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/tallships/Dwacs/44V5274.HEX</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/fsp_share/code/</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/fsp_share/images/</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/fsp_share/network/</INCLUDE>
+         <INCLUDE>/usr/local/efct/testfiles/fsp_share/boot/ddr2/</INCLUDE>
+         <INCLUDE>/usr/local/efct/modules/beta/1.14/</INCLUDE>
+         <INCLUDE>/usr/local/efct/eng_tools/find_logs.pl</INCLUDE>
+         <INCLUDE>/usr/local/efct/eng_tools/pack_logs.pl</INCLUDE>
+         <INCLUDE>/usr/local/efct/eng_tools/tar/</INCLUDE>
+      </PACK>
+   </CONTROL>
+   
+   <ENCRYPT>
+      <FILE>/usr/local/efct/xml/penguin.xml</FILE>
+      <FILE>/usr/local/efct/testfiles/penguin/penguin.pl</FILE>
+      <FILE>/usr/local/efct/testfiles/fsp_share/code/FSP.pm</FILE>
+      <FILE>/usr/local/efct/testfiles/fsp_share/code/UsbSerial.pm</FILE>
+      <INCLUDE>/usr/local/efct/modules/beta/1.14/modules.enc</INCLUDE>
+   </ENCRYPT>
+</PROJECT>

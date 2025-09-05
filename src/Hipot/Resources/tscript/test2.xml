@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+	<theader tname="Lilac FCT">
+	  <trevision>1.0</trevision>
+	  <tdescription>Just For Test.</tdescription>
+	  <towner>Somsak Bo.</towner>
+	</theader>
+	
+	<test tname="Login to Raspberry PI">
+		<use>DELAY,10000</use>
+		<use>SRP_0,write,</use>
+		<use>DELAY,3000</use>
+		<use>SRP_0,write,</use>
+		<use>DELAY,3000</use>
+		<use>SRP_0,write,pi</use>
+		<use>DELAY,3000</use>
+		<use>SRP_0,write,raspberry</use>	
+		<use>SRP_0,read,,pi@raspberrypi:~$,60000,show</use>	
+		<check>SRP_0,inword,pi@raspberrypi:~$,failstop</check>
+	</test>
+	
+	<test tname="TEST UP BROADCAST MULTICAST">
+		<use>DELAY,3000</use>
+		<use>SRP_0,read,sudo ifconfig eth0,pi@raspberrypi:~$,60000,show</use>
+		<check>SRP_0,inword,UP BROADCAST MULTICAST,failstop</check>
+	</test>
+	
+	<test tname="MTU Test">
+		<use>DELAY,3000</use>
+		<use>SRP_0,read,sudo ifconfig eth0,pi@raspberrypi:~$,60000,show</use>
+		<check>SRP_0,valueinline,UP BROADCAST MULTICAST  MTU:[*Q*]  Metric:1,1000_2000</check>
+		UP BROADCAST MULTICAST  MTU:1500  Metric:1
+	</test>
+
+	<test tname="Test Step#1 GoNoGo Sample test.">	
+		<use>GNG_0,Test Step#1 GoNoGo Sample test.,YESNO,D:\Proj\Pekasuz2\Pekasuz\bin\Debug\imgs\test1.png</use>
+		<check>GNG_0,GNGRTN,failstop</check>
+	</test>
+
+</maintest>

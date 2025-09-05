@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<maintest>
+	<theader tname="IBM Lilac FCT">
+	  <trevision>2.0</trevision>
+	  <tdescription>IBM Lilac Functional Card Test.</tdescription>
+	  <towner>Somsak Bo.</towner>
+	</theader>	
+	
+	<test tname="Power ON Tester">
+		<pekiowr>SRC_0,RY1 ON</pekiowr>
+		<delay>1000</delay>
+		<pekiowr>SRC_0,RY3 ON</pekiowr>
+		<delay>500</delay>
+		<pekiowr>SRC_0,RY3 OFF</pekiowr>
+		<delay>1000</delay>
+		<chkinword>SRC_0,PEKASUZ#>,failstop</chkinword>
+	</test>
+	<test tname="Initial DMM">
+		<srpwonly>SRP_1,SYST:REM,[*CRLF*]</srpwonly>
+		<delay>1000</delay>
+		<srpwonly>SRP_1,*RST,[*CRLF*]</srpwonly>
+		<delay>1000</delay>
+		<srpwonly>SRP_1,*CLS,[*CRLF*]</srpwonly>
+		<delay>1000</delay>
+		<display>DMM Model : ,[*NA*]</display>
+		<srpwonly>SRP_1,*IDN?,[*CRLF*]</srpwonly>
+		<delay>1000</delay>	
+		<srpronly>SRP_1</srpronly>
+		<chkinword>SRP_1,34970A,failstop</chkinword>
+	</test>
+	
+	<test tname="UUT's 12V current measurement">
+		<display>12V Current (A) : ,[*NA*]</display>
+		<srpwonly>SRP_1,MEAS:VOLT:DC? (@101),[*CRLF*]</srpwonly>
+		<delay>1000</delay>	
+		<srpronly>SRP_1,number</srpronly>
+		<chkvalue>SRP_1,0_100,failstop</chkvalue>
+	</test>
+	
+	<test tname="UUT's 3.3V current measurement">
+		<display>3.3V Current (A) : ,[*NA*]</display>
+		<srpwonly>SRP_1,MEAS:VOLT:DC? (@102),[*CRLF*]</srpwonly>
+		<delay>1000</delay>	
+		<srpronly>SRP_1,number</srpronly>
+		<chkvalue>SRP_1,0_100,failstop</chkvalue>
+	</test>		
+	
+	<test tname="WRITE Lilac VPD">	
+		<lilacwritevpd>SRC_0,D:\Pekasuz\bin\00E3903.bin,(*UUTSN*)</lilacwritevpd>		
+		<chkinword>SRC_0,VPD Program Complete.,failstop</chkinword>
+	</test>	
+	
+	<test tname="Verification Lilac VPD">
+		<lilacvpdver>SRC_0,D:\Pekasuz\bin\00E3903.bin,(*UUTSN*)</lilacvpdver>		
+		<pekiowr>SRC_0,RY5 OFF</pekiowr>
+		<delay>500</delay>
+	</test>		
+	
+	<test tname="Rebooting to Linux">
+		<srpwrchk>SRP_0,[*NA*],lilactest02 login:,240</srpwrchk>
+		<srpwonly>SRP_0,root</srpwonly>
+		<delay>1000</delay>
+		<srpwonly>SRP_0,tree4this</srpwonly>
+		<delay>1000</delay>
+		<srpronly>SRP_0</srpronly>
+		<srpwonly>SRP_0,reboot</srpwonly>
+		<delay>1000</delay>
+		<srpwrchk>SRP_0,[*NA*],lilactest02 login:,240</srpwrchk>
+		<srpwonly>SRP_0,root</srpwonly>
+		<delay>1000</delay>
+		<srpwonly>SRP_0,tree4this</srpwonly>
+		<delay>1000</delay>
+		<srpronly>SRP_0</srpronly>
+		<chkinword>SRP_0,[root@lilactest02 ~]#,failstop</chkinword>		
+	</test>
+	
+	<test tname="PCI-e List Check : USB Controller">			
+		<srpwonly>SRP_0,[*enter*]</srpwonly>
+		<delay>500</delay>
+		<srpronly>SRP_0</srpronly>
+		<srpwrchk>SRP_0,lspci -vv -s 01:00.0,[root@lilactest02 ~]#,10</srpwrchk>
+		<chkinword>SRP_0,USB controller: Texas Instruments,failcont</chkinword>
+	</test>	
+	
+	<test tname="PCI-e List Check : Device ID(049E)">	
+		<chkinword>SRP_0,Device 049e,failcont</chkinword>
+	</test>
+	
+	<test tname="PCI-e List Check : Target Link Speed(5GT/s)">	
+		<chkinword>SRP_0,Target Link Speed: 5GT/s,failcont</chkinword>
+	</test>
+	
+	<test tname="Channel 1 Speed test">
+		<srpwonly>SRP_0,[*enter*]</srpwonly>
+		<delay>500</delay>
+		<srpronly>SRP_0</srpronly>
+		<srpwrchk>SRP_0,hdparm -t /dev/sdb,[root@lilactest02 ~]#,10</srpwrchk>
+		<chkvalueinline>SRP_0, Timing buffered disk reads: [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,70_77,failcont</chkvalueinline>		
+	</test>
+	
+	<test tname="Channel 2 Speed test">
+		<srpwonly>SRP_0,[*enter*]</srpwonly>
+		<delay>500</delay>
+		<srpronly>SRP_0</srpronly>
+		<srpwrchk>SRP_0,hdparm -t /dev/sdc,[root@lilactest02 ~]#,10</srpwrchk>
+		<chkvalueinline>SRP_0, Timing buffered disk reads: [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,70_77,failcont</chkvalueinline>		
+	</test>
+	
+	<test tname="Channel 3 Speed test">
+		<srpwonly>SRP_0,[*enter*]</srpwonly>
+		<delay>500</delay>
+		<srpronly>SRP_0</srpronly>
+		<srpwrchk>SRP_0,hdparm -t /dev/sdd,[root@lilactest02 ~]#,10</srpwrchk>
+		<chkvalueinline>SRP_0, Timing buffered disk reads: [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,70_77,failcont</chkvalueinline>		
+	</test>
+	
+	<test tname="Channel 4 Speed test">
+		<srpwonly>SRP_0,[*enter*]</srpwonly>
+		<delay>500</delay>
+		<srpronly>SRP_0</srpronly>
+		<srpwrchk>SRP_0,hdparm -t /dev/sde,[root@lilactest02 ~]#,10</srpwrchk>
+		<chkvalueinline>SRP_0, Timing buffered disk reads: [*X*] MB in  [*X*] seconds =  [*Q*] MB/sec,70_77,failcont</chkvalueinline>		
+	</test>
+	
+	<posttest tname="Power Off tester">	
+		<srpwonly>SRP_0,poweroff</srpwonly>
+		<delay>12000</delay>
+		<pekiowr>SRC_0,RY1 OFF</pekiowr>
+		<delay>1000</delay>		
+		<chkinword>SRC_0,PEKASUZ#>,failcont</chkinword>
+	</posttest>
+	
+</maintest>

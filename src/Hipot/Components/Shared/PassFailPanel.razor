@@ -3,17 +3,24 @@
         <div class="pass-fail-body">
             @if (IsPassed)
             {
-                <img src="images/pass.png" />
+                <svg width="128" height="128" viewBox="0 0 24 24" fill="#28a745">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
                 <h2>PASS</h2>
             }
             else
             {
-                <img src="images/fail.png" />
+                <svg width="128" height="128" viewBox="0 0 24 24" fill="#dc3545">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/>
+                </svg>
                 <h2>FAIL</h2>
             }
         </div>
         <div class="pass-fail-footer">
-            <button class="btn-primary" @onclick="OnOkClicked">OK</button>
+            <button class="btn-primary" @onclick="OnOkClicked">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+                <span>OK</span>
+            </button>
         </div>
     </div>
 </div>
@@ -60,6 +67,29 @@
     .pass-fail-footer {
         padding: 1rem;
         border-top: 1px solid #eee;
+        display: flex;
+        justify-content: center;
+    }
+
+    .btn-primary {
+        padding: 0.8rem 1.2rem;
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        background-color: #28a745;
+    }
+
+    .btn-primary svg {
+        width: 18px;
+        height: 18px;
     }
 </style>
 

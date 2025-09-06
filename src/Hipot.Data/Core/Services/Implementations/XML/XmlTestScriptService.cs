@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Xml;
+using Hipot.Core.DTOs;
 using Hipot.Core.Services.Interfaces;
 using System.Threading.Tasks;
 
@@ -40,6 +41,24 @@ namespace Hipot.Core.Services.Implementations.XML
 
             Debug.WriteLine("No matching test script found.");
             return null;
+        }
+
+        public async Task<TestHeaderInfo> GetTestHeaderInfo(string testScript)
+        {
+            var xmlContent = await _fileService.GetScriptContent(testScript);
+            var xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(xmlContent);
+
+            var headerNode = xmlDoc.SelectSingleNode("maintest/header");
+            if (headerNode == null) return null;
+
+            return new TestHeaderInfo
+            {
+                TestName = headerNode.SelectSingleNode("testname")?.InnerText,
+                Revision = headerNode.SelectSingleNode("revision")?.InnerText,
+                Description = headerNode.SelectSingleNode("description")?.InnerText,
+                Owner = headerNode.SelectSingleNode("owner")?.InnerText
+            };
         }
 
         private bool IsSnFormatMatch(string sn, string format)

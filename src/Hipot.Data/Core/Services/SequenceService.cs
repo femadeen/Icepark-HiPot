@@ -1,4 +1,4 @@
-using System;
+using Hipot.Core.DTOs;
 using System.Collections.Concurrent;
 using System.Data;
 using System.Threading.Tasks;
@@ -22,6 +22,9 @@ public class TestChannelState
     public string FirstFailDescription { get; set; }
     public string CurrentTestStepName { get; set; }
     public string SerialNumber { get; set; }
+    public TestHeaderInfo HeaderInfo { get; set; }
+    public DateTime? StartTime { get; set; }
+    public DateTime? EndTime { get; set; }
     public Dictionary<string, string> PortData { get; set; } = new();
     public System.Text.StringBuilder MainLog { get; } = new();
     public System.Text.StringBuilder DetailLog { get; } = new();

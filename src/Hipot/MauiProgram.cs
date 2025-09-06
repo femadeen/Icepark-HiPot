@@ -49,9 +49,10 @@ public static class MauiProgram
 
             builder.Services.AddSingleton<IHttpService, HttpService>();
             builder.Services.AddSingleton<IUserService, XmlUserService>();
-            builder.Services.AddSingleton<IFileService, XmlFileService>();
+                        builder.Services.AddSingleton<IFileService, FileService>();
             builder.Services.AddSingleton<IChannelConfigService, XmlChannelConfigService>();
             builder.Services.AddSingleton<ISerialNumberService, XmlSerialNumberService>();
+            builder.Services.AddSingleton<IXmlTestScriptService, XmlTestScriptService>();
             builder.Services.AddSingleton<ITestService, XmlTestService>();
             builder.Services.AddSingleton<IXmlLoaderService, XmlLoaderService>();
             builder.Services.AddHttpClient();

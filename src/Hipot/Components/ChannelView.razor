@@ -3,27 +3,40 @@
 @using Hipot.Core.Services
 @using Hipot.Data.Core.Models
 @using Hipot.Components.Shared
+@using Hipot.Data
+@using Hipot.Core.Services.Interfaces
 
 <div class="channel-card">
     <div class="channel-header">
         <h2 class="channel-title">@ChannelState.Idm: @ChannelState.CurrentStatus</h2>
-        <span class="elapsed-time">@ElapsedTime</span>
+        <span class="elapsed-time">Elapsed Time: @ElapsedTime</span>
     </div>
     <div class="channel-content">
-        <div class="form-group">
-            <input type="text" 
-                   class="form-input" 
-                   @bind="ChannelState.SerialNumber" 
-                   @onkeydown="HandleSNKeyDown"
-                   placeholder=" " />
-            <label class="form-label">Serial Number</label>
+        <div class="input-group">
+            <div class="form-group">
+                <input type="text" 
+                       class="form-input" 
+                       @bind="ChannelState.SerialNumber" 
+                       @onkeydown="HandleSNKeyDown"
+                       placeholder=" " />
+                <label class="form-label">Serial Number</label>
+            </div>
+            <div class="button-group">
+                <button class="btn-primary" @onclick="StartTest">
+                    @if (_testHasRun)
+                    {
+                        <span>Retest</span>
+                    }
+                    else
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                        <span>Start</span>
+                    }
+                </button>
+                <button class="btn-error" @onclick="AbortTest" disabled="@(!_isTestRunning)">Abort</button>
+            </div>
         </div>
-        
-        <div class="button-group">
-            <button class="btn-primary" @onclick="StartTest">Start</button>
-            <button class="btn-error" @onclick="AbortTest">Abort</button>
-        </div>
-        
+
         <div class="progress-container">
             <div class="progress-header">
                 <span>Progress</span>
@@ -115,17 +128,24 @@
         color: #64748b;
     }
 
+    .input-group {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
     .form-group {
-        margin-bottom: 1.5rem;
+        flex-grow: 1;
         position: relative;
     }
 
     .form-input {
         width: 100%;
-        padding: 1rem 1.25rem;
+        padding: 0.8rem 1rem;
         border: 2px solid #e2e8f0;
-        border-radius: 16px;
-        font-size: 1rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
         transition: all 0.3s ease;
         background: #ffffff;
         outline: none;
@@ -135,15 +155,14 @@
     .form-input:focus {
         border-color: #dc2626;
         box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
-        transform: translateY(-1px);
     }
 
     .form-label {
         position: absolute;
-        left: 1.25rem;
-        top: 1rem;
+        left: 1rem;
+        top: 0.8rem;
         color: #64748b;
-        font-size: 1rem;
+        font-size: 0.9rem;
         pointer-events: none;
         transition: all 0.3s ease;
         background: white;
@@ -154,24 +173,22 @@
     .form-input:not(:placeholder-shown) + .form-label {
         top: -0.5rem;
         left: 0.75rem;
-        font-size: 0.875rem;
+        font-size: 0.8rem;
         color: #dc2626;
         font-weight: 500;
     }
 
     .button-group {
         display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
+        gap: 0.5rem;
     }
 
     .btn-primary, .btn-error {
-        flex: 1;
-        padding: 1rem;
+        padding: 0.8rem 1.2rem;
         border: none;
-        border-radius: 16px;
+        border-radius: 12px;
         color: white;
-        font-size: 1.1rem;
+        font-size: 0.9rem;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
@@ -179,41 +196,45 @@
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        position: relative;
-        overflow: hidden;
+    }
+
+    .btn-primary svg {
+        width: 18px;
+        height: 18px;
     }
 
     .btn-primary {
-        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        background-color: #dc2626;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.2);
     }
 
     .btn-error {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        background-color: #ef4444;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
     }
 
-    .btn-primary:hover, .btn-error:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(220, 38, 38, 0.3);
+    }
+    
+    .btn-error:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
     }
 
     .btn-primary:active, .btn-error:active {
         transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.2);
     }
 
-    .btn-primary::before, .btn-error::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-        transition: left 0.5s;
+    .btn-error:disabled, .btn-primary:disabled {
+        background-color: #fca5a5;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
     }
 
-    .btn-primary:hover::before, .btn-error:hover::before {
-        left: 100%;
-    }
 
     .progress-container {
         margin-bottom: 2rem;
@@ -283,7 +304,7 @@
         .channel-card {
             background: rgba(30, 41, 59, 0.95);
             color: #e2e8f0;
-            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(220, 38, 38, 0.2);
+            box-shadow: 0 32px 64px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(220, 38, 38, .2);
             border: 2px solid rgba(220, 38, 38, 0.2);
         }
 
@@ -335,7 +356,7 @@
             grid-template-columns: 1fr;
         }
         
-        .button-group {
+        .input-group {
             flex-direction: column;
         }
     }
@@ -347,6 +368,18 @@
 
     [Inject]
     private SequenceService SequenceService { get; set; }
+
+    [Inject]
+    private DataService DataService { get; set; }
+
+    [Inject]
+    private IXmlTestScriptService XmlTestScriptService { get; set; }
+
+    [Inject]
+    private IFileService FileService { get; set; }
+
+    private bool _isTestRunning = false;
+    private bool _testHasRun = false;
 
     private bool ShowInputPanel { get; set; }
     private string InputPanelTitle { get; set; }
@@ -370,22 +403,71 @@
         _timer = new System.Timers.Timer(1000);
         _timer.Elapsed += OnTimerTick;
         _timer.AutoReset = true;
+
+        SequenceService.OnLogMessage += (idm, message) =>
+        {
+            if (idm == ChannelState.Idm)
+            {
+                ChannelState.MainLog.AppendLine(message);
+                InvokeAsync(StateHasChanged);
+            }
+        };
+
+        SequenceService.OnDetailLogMessage += (idm, message) =>
+        {
+            if (idm == ChannelState.Idm)
+            {
+                ChannelState.DetailLog.AppendLine(message);
+                InvokeAsync(StateHasChanged);
+            }
+        };
+
+        SequenceService.OnProgressUpdate += (idm, progress) =>
+        {
+            if (idm == ChannelState.Idm)
+            {
+                ChannelState.SequencePointer = progress;
+                InvokeAsync(StateHasChanged);
+            }
+        };
+
+        SequenceService.OnTestCompleted += (idm) =>
+        {
+            if (idm == ChannelState.Idm)
+            {
+                _isTestRunning = false;
+                _testHasRun = true;
+                _stopwatch.Stop();
+                _timer.Stop();
+                InvokeAsync(StateHasChanged);
+            }
+        };
     }
 
     private async Task StartTest()
     {
-        _stopwatch.Start();
-        _timer.Start();
-        await SequenceService.ExecuteTestSequenceAsync(ChannelState.Idm);
-        _stopwatch.Stop();
-        _timer.Stop();
+        _isTestRunning = true;
+        _testHasRun = true;
+        var testScript = await XmlTestScriptService.GetTestScript(ChannelState.SerialNumber);
+        if (testScript != null)
+        {
+            var xmlContent = await FileService.GetScriptContent(testScript);
+            DataService.LoadMainSequence(ChannelState.Idm, xmlContent);
+            _stopwatch.Restart();
+            _timer.Start();
+            await SequenceService.ExecuteTestSequenceAsync(ChannelState.Idm);
+        }
+        else
+        {
+            // Handle case where test script is not found
+            _isTestRunning = false;
+            _testHasRun = false;
+        }
     }
 
     private void AbortTest()
     {
         ChannelState.ShouldStop = true;
-        _stopwatch.Stop();
-        _timer.Stop();
     }
 
     private void OnTimerTick(object sender, ElapsedEventArgs e)
@@ -441,5 +523,6 @@
     public void Dispose()
     {
         _timer?.Dispose();
+        // Unsubscribe from events here
     }
 }

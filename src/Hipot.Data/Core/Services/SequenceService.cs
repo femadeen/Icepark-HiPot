@@ -25,6 +25,21 @@ public class TestChannelState
     public Dictionary<string, string> PortData { get; set; } = new();
     public System.Text.StringBuilder MainLog { get; } = new();
     public System.Text.StringBuilder DetailLog { get; } = new();
+
+    public void Reset()
+    {
+        SequencePointer = 0;
+        CurrentStatus = "IDLE";
+        ShouldStop = false;
+        FirstFailHit = false;
+        IsPostTestReached = false;
+        TestResult = "PASSED";
+        FirstFailDescription = null;
+        CurrentTestStepName = null;
+        PortData.Clear();
+        MainLog.Clear();
+        DetailLog.Clear();
+    }
 }
 
 public class SequenceService
@@ -56,13 +71,17 @@ public class SequenceService
     {
         if (!_channelStates.TryGetValue(idm, out var state)) return;
 
+        state.Reset();
         state.CurrentStatus = "TESTING";
 
-        while (state.SequencePointer < _dataService.GetMainScanRowCount(idm) && !state.ShouldStop)
+        var mainScanTable = _dataService.GetMainScanDataTable(idm);
+
+        foreach (DataRow row in mainScanTable.Rows)
         {
+            if (state.ShouldStop) break;
+
+            state.SequencePointer = (int)row["vIdm"];
             OnProgressUpdate?.Invoke(idm, state.SequencePointer);
-            DataRow row = _dataService.GetMainScanRow(idm, state.SequencePointer);
-            if (row == null) break;
 
             string rowType = row["vType"].ToString();
             string rowStatus = row["vStatus"].ToString();
@@ -80,16 +99,14 @@ public class SequenceService
                     break; // Test aborted or finished
                 }
             }
-
-            state.SequencePointer++;
         }
 
         if (!state.IsPostTestReached)
         {
             FinalizeTest(state);
         }
-        
-        OnTestCompleted?.Invoke(idm);
+
+        EndTest(idm);
     }
 
     private void HandleMajorStep(TestChannelState state, string type, string function)
@@ -170,6 +187,14 @@ public class SequenceService
         if (!isAbort)
         {
             _logService.GenerateLog(state.SerialNumber, state.TestResult, state.MainLog.ToString(), state.DetailLog.ToString(), $"CH{state.Idm}");
+        }
+    }
+
+    private void EndTest(int idm)
+    {
+        if (_channelStates.TryGetValue(idm, out var state))
+        {
+            OnTestCompleted?.Invoke(idm);
         }
     }
 }

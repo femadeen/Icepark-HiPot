@@ -1,9 +1,12 @@
 ﻿
 using Hipot.Core.DTOs;
+using System.Collections.Generic;
 
-namespace Hipot.Data;
-
-public class AppState
+namespace Hipot.Data
 {
-    public UserInfo? CurrentUser { get; set; }
+    public class AppState
+    {
+        public UserInfo? CurrentUser { get; set; }
+        public List<string> ErrorMessages { get; set; } = new List<string>();
+    }
 }

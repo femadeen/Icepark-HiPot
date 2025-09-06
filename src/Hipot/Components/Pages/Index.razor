@@ -23,6 +23,19 @@
         </div>
     </div>
 
+    @if (AppState.ErrorMessages.Any())
+    {
+        <div class="error-container">
+            <h4>Configuration Errors:</h4>
+            <ul>
+                @foreach (var error in AppState.ErrorMessages)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        </div>
+    }
+
     @if (_isInitialized)
     {
         @if (_channelStates.Count > 0)
@@ -82,8 +95,15 @@
 
         foreach (var config in portConfigs)
         {
-            SerialPortService.AddPort(config.Name, config.PortName, config.BaudRate, config.Parity, config.DataBits, config.StopBits);
-            SerialPortService.OpenPort(config.Name);
+            try
+            {
+                SerialPortService.AddPort(config.Name, config.PortName, config.BaudRate, config.Parity, config.DataBits, config.StopBits);
+                SerialPortService.OpenPort(config.Name);
+            }
+            catch (Exception ex)
+            {
+                AppState.ErrorMessages.Add($"Failed to open port {config.PortName}: {ex.Message}");
+            }
         }
 
         var channelConfigs = await ChannelConfigService.GetChannelConfigurationsAsync();
@@ -99,7 +119,6 @@
             _channelStates.Add(state);
 
             DataService.CreateTempDataTable(idm);
-            DataService.CreateMainScanTable(idm);
             SequenceService.InitializeChannel(idm, ""); // SN will be set from UI
 
             idm++;

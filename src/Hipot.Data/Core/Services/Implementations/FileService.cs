@@ -1,37 +1,39 @@
+using System.IO;
+using System.Threading.Tasks;
 using Hipot.Core.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.Storage;
 
-namespace Hipot.Core.Services.Implementations.XML
+namespace Hipot.Core.Services.Implementations
 {
-    public class XmlFileService : IFileService
+    public class FileService : IFileService
     {
-        public string ScriptPath { get; private set; }
-        private readonly ILogger<XmlFileService> _logger;
+        public string ScriptPath { get; }
+        private readonly ILogger<FileService> _logger;
 
-        public XmlFileService() : this(MauiProgram.Services.GetService<ILogger<XmlFileService>>()) {}
-
-        public XmlFileService(ILogger<XmlFileService> logger)
+        public FileService(ILogger<FileService> logger)
         {
             _logger = logger;
-            _logger.LogInformation("XmlFileService constructor started.");
-
-            ScriptPath = Path.Combine(FileSystem.AppDataDirectory, "wwwroot", "tscripts");
-            _logger.LogInformation("ScriptPath: {ScriptPath}", ScriptPath);
-
+            ScriptPath = Path.Combine(FileSystem.AppDataDirectory, "tscript");
             EnsureDirectories();
 #if DEBUG
-            try
-            {
-                CopyScriptsIfDebug();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in CopyScriptsIfDebug. This is likely the cause of the startup error.");
-                throw; // Re-throw to ensure the app still fails, but now with logging.
-            }
+            CopyScriptsIfDebug();
 #endif
-            _logger.LogInformation("XmlFileService constructor finished.");
+        }
+
+        public async Task<string> GetScriptContent(string fileName)
+        {
+            var filePath = Path.Combine(ScriptPath, fileName);
+            if (File.Exists(filePath))
+            {
+                return await File.ReadAllTextAsync(filePath);
+            }
+            else
+            {
+                using var stream = await FileSystem.OpenAppPackageFileAsync($"tscript/{fileName}");
+                using var reader = new StreamReader(stream);
+                return await reader.ReadToEndAsync();
+            }
         }
 
         public void EnsureDirectories()
@@ -67,7 +69,7 @@ namespace Hipot.Core.Services.Implementations.XML
         public void CopyScriptsIfDebug()
         {
             var projectRoot = GetProjectRoot();
-            var devScriptPath = Path.Combine(projectRoot, "wwwroot", "tscripts");
+            var devScriptPath = Path.Combine(projectRoot, "Resources", "tscript");
             _logger.LogInformation("Dev script path: {devScriptPath}", devScriptPath);
 
             if (Directory.Exists(devScriptPath))
@@ -79,7 +81,7 @@ namespace Hipot.Core.Services.Implementations.XML
                     if (!File.Exists(destFile))
                     {
                         _logger.LogInformation("Copying {file} to {destFile}", file, destFile);
-                        File.Copy(file, destFile);
+                        File.Copy(file, destFile, true);
                     }
                 }
             }

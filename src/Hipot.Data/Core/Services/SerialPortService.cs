@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Hipot.Core.Services
 {
-    public class SerialPortService
+    public class SerialPortService : IDisposable
     {
         private readonly ConcurrentDictionary<string, SerialPort> _serialPorts = new();
 
@@ -83,6 +83,14 @@ namespace Hipot.Core.Services
             }
 
             return string.Empty;
+        }
+
+        public void Dispose()
+        {
+            foreach (var port in _serialPorts.Values)
+            {
+                port.Dispose();
+            }
         }
     }
 }

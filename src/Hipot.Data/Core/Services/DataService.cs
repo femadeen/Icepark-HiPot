@@ -1,14 +1,23 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Data;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Xml;
+using Hipot.Core.Services.Interfaces;
 
 namespace Hipot.Data;
 
 public class DataService
 {
+    private readonly IFileService _fileService;
     private readonly ConcurrentDictionary<int, DataTable> _tempData = new();
     private readonly ConcurrentDictionary<int, DataTable> _mainScanData = new();
+
+    public DataService(IFileService fileService)
+    {
+        _fileService = fileService;
+    }
 
     // Methods for temporary data
 
@@ -108,7 +117,7 @@ public class DataService
 
     // Methods for main sequence data
 
-    public bool LoadMainSequence(int idm, string xmlPath, Action<int, int> initProgressBar, Action<int, string> appMain, Func<string, string> getTestHeader)
+    public bool LoadMainSequence(int idm, string xmlContent)
     {
         try
         {
@@ -116,39 +125,43 @@ public class DataService
             CreateMainScanTable(idm);
 
             var xmlDoc = new XmlDocument();
-            xmlDoc.Load(xmlPath);
+            xmlDoc.LoadXml(xmlContent);
 
             ProcessSequenceNodes(idm, xmlDoc, "maintest/pretest", "PRETEST");
             ProcessSequenceNodes(idm, xmlDoc, "maintest/test", "TEST");
             ProcessSequenceNodes(idm, xmlDoc, "maintest/posttest", "POSTTEST");
 
-            initProgressBar(idm, _mainScanData[idm].Rows.Count);
-            appMain(idm, getTestHeader(xmlPath));
-            var uSN = GetTempData(idm, "UUT_SN"); // Assuming UUT_SN is stored in temp data
-            appMain(idm, $"UUT's Serial number : {uSN}");
-            appMain(idm, GetAllTempDataAsString(idm));
-
+            Debug.WriteLine($"Main scan table for idm {idm} has {_mainScanData[idm].Rows.Count} rows.");
             return true;
         }
         catch (Exception ex)
         {
-            // In a real app, use a proper logging framework and show a user-friendly error.
-            Console.WriteLine($"Load Main Sequence Error: {ex.Message}");
+            Debug.WriteLine($"Load Main Sequence Error: {ex.Message}");
             return false;
         }
     }
 
     private void ProcessSequenceNodes(int idm, XmlDocument xmlDoc, string xpath, string testType)
     {
+        Debug.WriteLine($"Processing sequence nodes for xpath: {xpath}");
         var nodeList = xmlDoc.SelectNodes(xpath);
-        if (nodeList == null) return;
+        if (nodeList == null)
+        {
+            Debug.WriteLine("Node list is null.");
+            return;
+        }
+
+        Debug.WriteLine($"Found {nodeList.Count} nodes.");
 
         foreach (XmlNode node in nodeList)
         {
-            AddMainScanRow(idm, "IDLE", testType, node.Attributes?["tname"]?.Value ?? "", "NA");
+            var tname = node.Attributes?["tname"]?.Value ?? "";
+            Debug.WriteLine($"Node: {node.Name}, tname: {tname}");
+            AddMainScanRow(idm, "IDLE", testType, tname, "NA");
             foreach (XmlNode childNode in node.ChildNodes)
             {
                 var status = childNode.Name.ToUpper() != "#COMMENT" ? "IDLE" : "DONE";
+                Debug.WriteLine($"  Child Node: {childNode.Name}, Status: {status}, InnerText: {childNode.InnerText}");
                 AddMainScanRow(idm, status, "INNER", childNode.Name.ToUpper(), childNode.InnerText);
             }
         }
@@ -156,6 +169,7 @@ public class DataService
 
     public void CreateMainScanTable(int idm)
     {
+        Debug.WriteLine($"Creating main scan table for idm: {idm}");
         var dt = new DataTable();
         dt.Columns.Add("vIdm", typeof(int));
         dt.Columns.Add("vStatus", typeof(string));
@@ -201,5 +215,17 @@ public class DataService
             return table.Rows.Count;
         }
         return 0;
+    }
+
+    public DataTable GetMainScanDataTable(int idm)
+    {
+        Debug.WriteLine($"Getting main scan table for idm: {idm}");
+        if (_mainScanData.TryGetValue(idm, out var table))
+        {
+            Debug.WriteLine("Table found.");
+            return table;
+        }
+        Debug.WriteLine("Table not found.");
+        return null;
     }
 }

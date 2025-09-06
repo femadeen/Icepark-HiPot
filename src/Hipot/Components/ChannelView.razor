@@ -53,6 +53,7 @@
         </div>
 
         <div class="test-header-info">
+            <h3>Test Information</h3>
             @if (ChannelState.HeaderInfo != null)
             {
                 <div><strong>Test Name:</strong> @ChannelState.HeaderInfo.TestName</div>
@@ -291,6 +292,16 @@
         padding: 1rem;
         border: 1px solid #e2e8f0;
         border-radius: 12px;
+    }
+
+    .test-header-info h3 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #334155;
+        border-bottom: 1px solid #e2e8f0;
+        padding-bottom: 0.5rem;
     }
 
     .log-container {

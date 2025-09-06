@@ -49,15 +49,15 @@ namespace Hipot.Core.Services.Implementations.XML
             var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(xmlContent);
 
-            var headerNode = xmlDoc.SelectSingleNode("maintest/header");
+            var headerNode = xmlDoc.SelectSingleNode("maintest/theader");
             if (headerNode == null) return null;
 
             return new TestHeaderInfo
             {
-                TestName = headerNode.SelectSingleNode("testname")?.InnerText,
-                Revision = headerNode.SelectSingleNode("revision")?.InnerText,
-                Description = headerNode.SelectSingleNode("description")?.InnerText,
-                Owner = headerNode.SelectSingleNode("owner")?.InnerText
+                TestName = headerNode.Attributes?["tname"]?.Value,
+                Revision = headerNode.SelectSingleNode("trevision")?.InnerText,
+                Description = headerNode.SelectSingleNode("tdescription")?.InnerText,
+                Owner = headerNode.SelectSingleNode("towner")?.InnerText
             };
         }
 

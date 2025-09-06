@@ -4,6 +4,8 @@ using Hipot.Core.Services.Implementations;
 using Hipot.Core.Services.Interfaces;
 using Hipot.Data;
 using Hipot.Data.Core.Services;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Hipot.Core.Services;
 
@@ -13,13 +15,17 @@ public class MappingService
     private readonly IHttpService _httpService;
     private readonly SerialPortService _serialPortService;
     private readonly VpdService _vpdService;
+    private readonly IConfiguration _configuration;
+    private readonly ILogger<MappingService> _logger;
 
-    public MappingService(DataService dataService, IHttpService httpService, SerialPortService serialPortService, VpdService vpdService)
+    public MappingService(DataService dataService, IHttpService httpService, SerialPortService serialPortService, VpdService vpdService, IConfiguration configuration, ILogger<MappingService> logger)
     {
         _dataService = dataService;
         _httpService = httpService;
         _serialPortService = serialPortService;
         _vpdService = vpdService;
+        _configuration = configuration;
+        _logger = logger;
     }
 
     public async Task MapFunction(TestChannelState state, string functionName, string arguments)
@@ -68,6 +74,14 @@ public class MappingService
 
             case "SRPWRCHK":
                 await HandleSrpWriteReadCheck(state, args);
+                break;
+
+            case "GETHTTPGET":
+                await HandleGetHttpGet(state, args);
+                break;
+
+            case "CHKODC":
+                HandleChkOdc(state, args);
                 break;
 
             // ... other cases will be added here
@@ -277,6 +291,43 @@ public class MappingService
         {
             // Log exception
             _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "ABORT");
+        }
+    }
+
+    private async Task HandleGetHttpGet(TestChannelState state, string[] args)
+    {
+        try
+        {
+            string variableName = args[0];
+            string url = args[1];
+            _logger.LogInformation("Attempting to call URL: {Url}", url);
+
+            string response = await _httpService.GetAsync(url);
+            _logger.LogInformation("Successfully received response from URL: {Url}", url);
+            _dataService.PutTempData(state.Idm, variableName, response);
+            _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "DONE");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to get data from URL.");
+            _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "ABORT");
+        }
+    }
+
+    private void HandleChkOdc(TestChannelState state, string[] args)
+    {
+        string variableName = args[0];
+        string expectedValue = args[1];
+
+        string actualValue = _dataService.GetTempData(state.Idm, variableName);
+
+        if (actualValue.Contains(expectedValue))
+        {
+            _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "PASS");
+        }
+        else
+        {
+            _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "FAIL");
         }
     }
 }

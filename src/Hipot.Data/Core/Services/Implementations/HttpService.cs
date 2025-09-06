@@ -1,4 +1,5 @@
 ﻿using Hipot.Core.Services.Interfaces;
+using Microsoft.Extensions.Logging;
 using System.Text;
 
 namespace Hipot.Core.Services.Implementations;
@@ -6,10 +7,12 @@ namespace Hipot.Core.Services.Implementations;
 public class HttpService : IHttpService
 {
     private readonly HttpClient _httpClient;
+    private readonly ILogger<HttpService> _logger;
 
-    public HttpService(HttpClient httpClient)
+    public HttpService(HttpClient httpClient, ILogger<HttpService> logger)
     {
         _httpClient = httpClient;
+        _logger = logger;
     }
 
     public async Task<string> GetAsync(string url)
@@ -20,8 +23,8 @@ public class HttpService : IHttpService
         }
         catch (HttpRequestException ex)
         {
-            // log this exception.
-            return ex.Message;
+            _logger.LogError(ex, "HTTP GET request failed for URL: {Url}", url);
+            throw;
         }
     }
 
@@ -36,8 +39,8 @@ public class HttpService : IHttpService
         }
         catch (HttpRequestException ex)
         {
-            // log this exception.
-            return ex.Message;
+            _logger.LogError(ex, "HTTP POST request failed for URL: {Url}", url);
+            throw;
         }
     }
 }

@@ -78,7 +78,10 @@ namespace Hipot.Core.Services.Implementations
                 foreach (var file in Directory.GetFiles(devScriptPath))
                 {
                     var destFile = Path.Combine(ScriptPath, Path.GetFileName(file));
-                    if (!File.Exists(destFile))
+                    var sourceWriteTime = File.GetLastWriteTimeUtc(file);
+                    var destWriteTime = File.Exists(destFile) ? File.GetLastWriteTimeUtc(destFile) : DateTime.MinValue;
+
+                    if (sourceWriteTime > destWriteTime)
                     {
                         _logger.LogInformation("Copying {file} to {destFile}", file, destFile);
                         File.Copy(file, destFile, true);

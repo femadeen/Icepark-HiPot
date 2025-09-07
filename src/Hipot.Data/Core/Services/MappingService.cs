@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Hipot.Core.Services.Implementations;
@@ -168,10 +168,11 @@ public class MappingService
         try
         {
             string portKey = $"{state.Idm}_{args[0]}"; // Construct the port key
+            string portName = $"{args[0]}"; // Construct the port key
             string data = args[1];
             string suffix = args.Length > 2 ? GetSuffix(args[2]) : "\r";
 
-            _serialPortService.WriteToSrp(portKey, data + suffix);
+            _serialPortService.WriteToSrp(portName, data + suffix);
             _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "DONE");
         }
         catch (Exception ex)
@@ -286,13 +287,23 @@ public class MappingService
     {
         string inputValue = _dataService.GetTempData(state.Idm, args[0]);
         string wordToFind = args[1];
+        string action = (args.Length > 2) ? args[2].ToUpper() : "";
 
-        if (inputValue.Contains(wordToFind))
+        if (inputValue != null && inputValue.Contains(wordToFind))
         {
             _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "PASS");
         }
         else
         {
+            //if (action == "FAILSTOP")
+            //{
+            //    _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "STOPTEST");
+            //}
+            //else
+            //{
+            //    _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "FAIL");
+            //}
+
             _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "FAIL");
         }
     }
@@ -304,7 +315,7 @@ public class MappingService
             string portKey = $"{state.Idm}_{args[0]}"; // Construct the port key
             string portName = args[0];
 
-            string newData = _serialPortService.ReadFromSrp(portKey);
+            string newData = _serialPortService.ReadFromSrp(portName);
 
             if (!state.PortData.ContainsKey(portName))
             {

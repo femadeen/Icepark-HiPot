@@ -119,7 +119,7 @@
             _channelStates.Add(state);
 
             DataService.CreateTempDataTable(idm);
-            SequenceService.InitializeChannel(idm, ""); // SN will be set from UI
+            SequenceService.InitializeChannel(state); // Pass the state object
 
             idm++;
         }

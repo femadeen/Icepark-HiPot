@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Hipot.Core.Services.Implementations;
 using Hipot.Core.Services.Interfaces;
@@ -63,7 +64,7 @@ public class MappingService
             case "SRPRONLY":
                 HandleSrpReadOnly(state, args);
                 break;
-            
+
             case "LILACWRITEVPD":
                 await HandleLilacWriteVpd(state, args);
                 break;
@@ -78,6 +79,10 @@ public class MappingService
 
             case "GETHTTPGET":
                 await HandleGetHttpGet(state, args);
+                break;
+
+            case "UPLOADODCXML":
+                await HandleUploadOdcXml(state, args);
                 break;
 
             case "CHKODC":
@@ -190,13 +195,39 @@ public class MappingService
 
     private string ReplaceStandardVariables(TestChannelState state, string text)
     {
-        // This is a simplified implementation of ReplaceStdVar
-        // In a real app, a more robust parsing mechanism would be better.
-        if (!text.Contains("(*")) return text;
+        var result = text;
+        var pattern = @"\(\*([^)]+)\*\)";
+        var matches = Regex.Matches(text, pattern);
 
-        // Example: replace "(*UUTSN*)" with the serial number
-        return text.Replace("(*UUTSN*)", state.SerialNumber);
-        // This needs to be expanded to handle all standard variables from GetValFromStdParam
+        foreach (Match match in matches)
+        {
+            var variableName = match.Groups[1].Value.ToUpper();
+            string valueToReplace = GetValueFromStandardParameter(state, variableName);
+            result = result.Replace(match.Value, valueToReplace);
+        }
+
+        if (result.Contains("?sn="))
+        {
+            var urlParts = result.Split(new[] { "?sn=" }, StringSplitOptions.None);
+            if (urlParts.Length > 1 && string.IsNullOrEmpty(urlParts[1]))
+            {
+                result += state.SerialNumber;
+            }
+        }
+
+        return result;
+    }
+
+    private string GetValueFromStandardParameter(TestChannelState state, string variableName)
+    {
+        switch (variableName)
+        {
+            case "UUTSN":
+                return state.SerialNumber;
+            // Add other cases as needed from the legacy app
+            default:
+                return _dataService.GetTempData(state.Idm, variableName) ?? "";
+        }
     }
 
     private async Task HandleDelay(TestChannelState state, string[] args)
@@ -300,6 +331,7 @@ public class MappingService
         {
             string variableName = args[0];
             string url = args[1];
+            System.Diagnostics.Debug.WriteLine($"Attempting to call URL: {url}");
             _logger.LogInformation("Attempting to call URL: {Url}", url);
 
             string response = await _httpService.GetAsync(url);
@@ -309,7 +341,41 @@ public class MappingService
         }
         catch (Exception ex)
         {
+            string errorMessage = $"Failed to get data from URL: {args[1]}. Exception: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine(errorMessage);
             _logger.LogError(ex, "Failed to get data from URL.");
+            state.FirstFailDescription = "Unable to connect to the remote server";
+            _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "ABORT");
+        }
+    }
+
+    private async Task HandleUploadOdcXml(TestChannelState state, string[] args)
+    {
+        try
+        {
+            string variableName = args[0];
+            string url = args[1];
+            string postData = args[2]; // This might need to be retrieved from somewhere else
+
+            // In the legacy app, PostStr(Idm) = SplArg(2). Here we assume it's passed directly.
+            // This might need adjustment based on how post data is handled.
+            string processedPostData = ReplaceStandardVariables(state, postData);
+
+            System.Diagnostics.Debug.WriteLine($"Attempting to POST to URL: {url}");
+            _logger.LogInformation("Attempting to POST to URL: {Url}", url);
+
+            string response = await _httpService.PostAsync(url, processedPostData);
+
+            _logger.LogInformation("Successfully received response from URL: {Url}", url);
+            _dataService.PutTempData(state.Idm, variableName, response);
+            _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "DONE");
+        }
+        catch (Exception ex)
+        {
+            string errorMessage = $"Failed to POST data to URL: {args[1]}. Exception: {ex.Message}";
+            System.Diagnostics.Debug.WriteLine(errorMessage);
+            _logger.LogError(ex, "Failed to POST data to URL.");
+            state.FirstFailDescription = "Unable to connect to the remote server";
             _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "ABORT");
         }
     }

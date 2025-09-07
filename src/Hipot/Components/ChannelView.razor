@@ -65,6 +65,10 @@
             {
                 <div><strong>Start Date/Time:</strong> @ChannelState.StartTime.Value.ToString("yyyy/MM/dd HH:mm:ss")</div>
             }
+            @if (!string.IsNullOrEmpty(ChannelState.SerialNumber))
+            {
+                <div><strong>UUT's Serial number:</strong> @ChannelState.SerialNumber</div>
+            }
             @if (ChannelState.EndTime.HasValue)
             {
                 <div><strong>Ending Test:</strong> @ChannelState.EndTime.Value.ToString("yyyy/MM/dd HH:mm:ss")</div>

@@ -65,9 +65,9 @@ public class SequenceService
         _mappingService = mappingService;
     }
 
-    public void InitializeChannel(int idm, string serialNumber)
+    public void InitializeChannel(TestChannelState state)
     {
-        _channelStates[idm] = new TestChannelState { Idm = idm, SerialNumber = serialNumber };
+        _channelStates[state.Idm] = state;
     }
 
     public async Task ExecuteTestSequenceAsync(int idm)
@@ -78,9 +78,11 @@ public class SequenceService
         state.CurrentStatus = "TESTING";
 
         var mainScanTable = _dataService.GetMainScanDataTable(idm);
+        bool testAborted = false;
 
-        foreach (DataRow row in mainScanTable.Rows)
+        for (int i = 0; i < mainScanTable.Rows.Count; i++)
         {
+            var row = mainScanTable.Rows[i];
             if (state.ShouldStop) break;
 
             state.SequencePointer = (int)row["vIdm"];
@@ -99,12 +101,26 @@ public class SequenceService
             {
                 if (!await HandleInnerStep(state, rowStatus, rowFunction, rowVariable))
                 {
+                    testAborted = true;
+                    break; // Test aborted or finished
+                }
+            }
+
+            // After HandleInnerStep, the status might have been updated.
+            var updatedRow = _dataService.GetMainScanRow(idm, state.SequencePointer);
+            var updatedStatus = updatedRow["vStatus"].ToString();
+
+            if (updatedStatus == "ABORT" || updatedStatus == "ABORTODC")
+            {
+                if (!await HandleInnerStep(state, updatedStatus, rowFunction, rowVariable))
+                {
+                    testAborted = true;
                     break; // Test aborted or finished
                 }
             }
         }
 
-        if (!state.IsPostTestReached)
+        if (!state.IsPostTestReached && !testAborted)
         {
             FinalizeTest(state);
         }
@@ -171,6 +187,14 @@ public class SequenceService
 
             case "ABORT":
             case "ABORTODC":
+                state.TestResult = "ABORTED";
+                if (!state.FirstFailHit)
+                {
+                    state.FirstFailHit = true;
+                    OnLogMessage?.Invoke(state.Idm, $"ABORTED BY {state.CurrentStatus} : {state.CurrentTestStepName} FAIL");
+                    OnDetailLogMessage?.Invoke(state.Idm, $"Result: FAIL");
+                    OnDetailLogMessage?.Invoke(state.Idm, $"Current Station : {state.FirstFailDescription}");
+                }
                 FinalizeTest(state, isAbort: true);
                 return false; // End execution
 

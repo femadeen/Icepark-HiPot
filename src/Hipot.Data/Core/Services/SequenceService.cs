@@ -83,8 +83,7 @@ public class SequenceService
         for (int i = 0; i < mainScanTable.Rows.Count; i++)
         {
             var row = mainScanTable.Rows[i];
-            if (state.ShouldStop) break;
-
+            
             state.SequencePointer = (int)row["vIdm"];
             OnProgressUpdate?.Invoke(idm, state.SequencePointer);
 
@@ -93,26 +92,34 @@ public class SequenceService
             string rowFunction = row["vFunction"].ToString();
             string rowVariable = row["vVariable"].ToString();
 
+            if (state.ShouldStop && rowType.ToUpper() != "POSTTEST")
+            {
+                if(rowType.ToUpper() != "INNER")
+                {
+                    _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "DONE");
+                }
+                continue; // Skip non-post-test steps after a failstop
+            }
+
+            string currentStatus = rowStatus;
+
+            // If it's an inner step that hasn't run yet, run it and get the result status
+            if (rowType == "INNER" && currentStatus.ToUpper() == "IDLE")
+            {
+                // HandleInnerStep with "IDLE" calls MapFunction
+                await HandleInnerStep(state, currentStatus, rowFunction, rowVariable);
+                var updatedRow = _dataService.GetMainScanRow(idm, state.SequencePointer);
+                currentStatus = updatedRow["vStatus"].ToString();
+            }
+
             if (rowType != "INNER" && rowStatus == "IDLE")
             {
                 HandleMajorStep(state, rowType, rowFunction);
             }
             else
             {
-                if (!await HandleInnerStep(state, rowStatus, rowFunction, rowVariable))
-                {
-                    testAborted = true;
-                    break; // Test aborted or finished
-                }
-            }
-
-            // After HandleInnerStep, the status might have been updated.
-            var updatedRow = _dataService.GetMainScanRow(idm, state.SequencePointer);
-            var updatedStatus = updatedRow["vStatus"].ToString();
-
-            if (updatedStatus == "ABORT" || updatedStatus == "ABORTODC")
-            {
-                if (!await HandleInnerStep(state, updatedStatus, rowFunction, rowVariable))
+                // Now handle the actual status (PASS, FAIL, STOPTEST, etc.)
+                if (!await HandleInnerStep(state, currentStatus, rowFunction, rowVariable))
                 {
                     testAborted = true;
                     break; // Test aborted or finished
@@ -136,6 +143,7 @@ public class SequenceService
         if (type.ToUpper() == "POSTTEST")
         {
             state.IsPostTestReached = true;
+            state.FirstFailHit = false; // Reset for post-test
             FinalizeTest(state);
         }
         _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "DONE");
@@ -146,7 +154,7 @@ public class SequenceService
         switch (status.ToUpper())
         {
             case "IDLE":
-                if (state.ShouldStop)
+                if (state.ShouldStop && !state.IsPostTestReached)
                 {
                     _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "DONE");
                 }
@@ -187,13 +195,12 @@ public class SequenceService
 
             case "ABORT":
             case "ABORTODC":
-                state.TestResult = "ABORTED";
+                state.TestResult = "FAILED";
                 if (!state.FirstFailHit)
                 {
                     state.FirstFailHit = true;
-                    OnLogMessage?.Invoke(state.Idm, $"ABORTED BY {state.CurrentStatus} : {state.CurrentTestStepName} FAIL");
-                    OnDetailLogMessage?.Invoke(state.Idm, $"Result: FAIL");
-                    OnDetailLogMessage?.Invoke(state.Idm, $"Current Station : {state.FirstFailDescription}");
+                    OnLogMessage?.Invoke(state.Idm, "ABORTED BY PRETEST : ODC CHECKING FAIL");
+                    OnDetailLogMessage?.Invoke(state.Idm, "Result: FAIL");
                 }
                 FinalizeTest(state, isAbort: true);
                 return false; // End execution

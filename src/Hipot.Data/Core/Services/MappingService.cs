@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Hipot.Core.Services.Implementations;
@@ -93,7 +93,7 @@ public class MappingService
 
             default:
                 // Function not implemented yet
-                _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "FAIL");
+                _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "ABORT");
                 break;
         }
     }
@@ -167,12 +167,18 @@ public class MappingService
     {
         try
         {
-            string portKey = $"{state.Idm}_{args[0]}"; // Construct the port key
-            string portName = $"{args[0]}"; // Construct the port key
+            string portName = args[0];
+            string portKey = $"{state.Idm}_{portName}"; // Construct the port key
             string data = args[1];
             string suffix = args.Length > 2 ? GetSuffix(args[2]) : "\r";
 
-            _serialPortService.WriteToSrp(portName, data + suffix);
+            if (state.PortData.ContainsKey(portName))
+            {
+                state.PortData[portName] = string.Empty;
+            }
+            _dataService.PutTempData(state.Idm, portName, string.Empty);
+
+            _serialPortService.WriteToSrp(portKey, data + suffix);
             _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "DONE");
         }
         catch (Exception ex)
@@ -197,7 +203,7 @@ public class MappingService
     private string ReplaceStandardVariables(TestChannelState state, string text)
     {
         var result = text;
-        var pattern = @"\(\*([^)]+)\*\)";
+        var pattern = @"\(\*([^)]+)\)";
         var matches = Regex.Matches(text, pattern);
 
         foreach (Match match in matches)
@@ -295,16 +301,14 @@ public class MappingService
         }
         else
         {
-            //if (action == "FAILSTOP")
-            //{
-            //    _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "STOPTEST");
-            //}
-            //else
-            //{
-            //    _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "FAIL");
-            //}
-
-            _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "FAIL");
+            if (action == "FAILSTOP")
+            {
+                _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "STOPTEST");
+            }
+            else
+            {
+                _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "FAIL");
+            }
         }
     }
 
@@ -312,10 +316,16 @@ public class MappingService
     {
         try
         {
-            string portKey = $"{state.Idm}_{args[0]}"; // Construct the port key
             string portName = args[0];
+            string portKey = $"{state.Idm}_{portName}"; // Construct the port key
 
-            string newData = _serialPortService.ReadFromSrp(portName);
+            string newData = _serialPortService.ReadFromSrp(portKey);
+
+            if (string.IsNullOrEmpty(newData))
+            {
+                _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "STOPTEST");
+                return;
+            }
 
             if (!state.PortData.ContainsKey(portName))
             {

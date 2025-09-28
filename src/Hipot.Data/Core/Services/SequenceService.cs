@@ -65,9 +65,9 @@ public class SequenceService
         _mappingService = mappingService;
     }
 
-    public void InitializeChannel(int idm, string serialNumber)
+    public void InitializeChannel(TestChannelState state)
     {
-        _channelStates[idm] = new TestChannelState { Idm = idm, SerialNumber = serialNumber };
+        _channelStates[state.Idm] = state;
     }
 
     public async Task ExecuteTestSequenceAsync(int idm)
@@ -78,11 +78,12 @@ public class SequenceService
         state.CurrentStatus = "TESTING";
 
         var mainScanTable = _dataService.GetMainScanDataTable(idm);
+        bool testAborted = false;
 
-        foreach (DataRow row in mainScanTable.Rows)
+        for (int i = 0; i < mainScanTable.Rows.Count; i++)
         {
-            if (state.ShouldStop) break;
-
+            var row = mainScanTable.Rows[i];
+            
             state.SequencePointer = (int)row["vIdm"];
             OnProgressUpdate?.Invoke(idm, state.SequencePointer);
 
@@ -91,20 +92,42 @@ public class SequenceService
             string rowFunction = row["vFunction"].ToString();
             string rowVariable = row["vVariable"].ToString();
 
+            if (state.ShouldStop && rowType.ToUpper() != "POSTTEST")
+            {
+                if(rowType.ToUpper() != "INNER")
+                {
+                    _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "DONE");
+                }
+                continue; // Skip non-post-test steps after a failstop
+            }
+
+            string currentStatus = rowStatus;
+
+            // If it's an inner step that hasn't run yet, run it and get the result status
+            if (rowType == "INNER" && currentStatus.ToUpper() == "IDLE")
+            {
+                // HandleInnerStep with "IDLE" calls MapFunction
+                await HandleInnerStep(state, currentStatus, rowFunction, rowVariable);
+                var updatedRow = _dataService.GetMainScanRow(idm, state.SequencePointer);
+                currentStatus = updatedRow["vStatus"].ToString();
+            }
+
             if (rowType != "INNER" && rowStatus == "IDLE")
             {
                 HandleMajorStep(state, rowType, rowFunction);
             }
             else
             {
-                if (!await HandleInnerStep(state, rowStatus, rowFunction, rowVariable))
+                // Now handle the actual status (PASS, FAIL, STOPTEST, etc.)
+                if (!await HandleInnerStep(state, currentStatus, rowFunction, rowVariable))
                 {
+                    testAborted = true;
                     break; // Test aborted or finished
                 }
             }
         }
 
-        if (!state.IsPostTestReached)
+        if (!state.IsPostTestReached && !testAborted)
         {
             FinalizeTest(state);
         }
@@ -120,6 +143,7 @@ public class SequenceService
         if (type.ToUpper() == "POSTTEST")
         {
             state.IsPostTestReached = true;
+            state.FirstFailHit = false; // Reset for post-test
             FinalizeTest(state);
         }
         _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "DONE");
@@ -130,7 +154,7 @@ public class SequenceService
         switch (status.ToUpper())
         {
             case "IDLE":
-                if (state.ShouldStop)
+                if (state.ShouldStop && !state.IsPostTestReached)
                 {
                     _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "DONE");
                 }
@@ -171,6 +195,13 @@ public class SequenceService
 
             case "ABORT":
             case "ABORTODC":
+                state.TestResult = "FAILED";
+                if (!state.FirstFailHit)
+                {
+                    state.FirstFailHit = true;
+                    OnLogMessage?.Invoke(state.Idm, "ABORTED BY PRETEST : ODC CHECKING FAIL");
+                    OnDetailLogMessage?.Invoke(state.Idm, "Result: FAIL");
+                }
                 FinalizeTest(state, isAbort: true);
                 return false; // End execution
 

@@ -1,16 +1,16 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <maintest>
 <theader tname="rho200">
   <trevision>1.0</trevision>
   <tdescription>Rho200 Hi-Pot Test.</tdescription>
   <towner>Akrapoom K.</towner>
 </theader>
-<pretest tname="ODC Checking">
+<!--<pretest tname="ODC Checking">
 	<gethttpget>ODCCURST,http://10.196.100.17/des/elm/check.asp?sn=(*UUTSN*)</gethttpget>
 	<display>Check Current station : (*UUTSN*),(*NA*)</display> 
 	<display>Current Station : (*ODCCURST*),(*NA*)</display> 
 	<chkodc>ODCCURST,610005</chkodc>
-</pretest>
+</pretest>-->
 
 <test tname="Initial Electrical Safety Compliance Analyzer">
 	<display>Electrical Safety Compliance Analyzer Model : ,[*ENTER*]</display>

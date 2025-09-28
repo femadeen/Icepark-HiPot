@@ -1,5 +1,4 @@
-﻿using Hipot.Core.Context;
-using Hipot.Core.Repositories.Implementations;
+﻿using Hipot.Core.Repositories.Implementations;
 using Hipot.Core.Repositories.Interfaces;
 using Hipot.Core.Services;
 using Hipot.Core.Services.Implementations;
@@ -11,6 +10,7 @@ using Hipot.Data.Core.Services.Implementations.XML;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
+using Hipot.Data.Core.Context;
 
 namespace Hipot;
 

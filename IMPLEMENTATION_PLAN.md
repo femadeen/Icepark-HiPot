@@ -1,46 +1,75 @@
-# Implementation Plan: Hipot Legacy App Conversion
+# Implementation Plan: Authentication with Roles
 
-This document outlines the plan for converting the legacy `Pekasuz3` Windows Forms application to a modern .NET MAUI Blazor application.
+This plan outlines the steps to create a user authentication system where each user is associated with a project and has a specific role. The data will be persisted in a SQL Server database using Entity Framework Core.
 
-## 1. Replicate the UI Panels
+### 1. Define Database Models
 
-The legacy application uses several pop-up panels for user interaction. These have been recreated as reusable Blazor components:
+-   **Location:** `src/Hipot.Data/Core/Models/`
+-   **Actions:**
+    -   Create a `Role` enum with values like `Admin`, `Operator`, and `Viewer`.
+    -   Create a `User` entity with properties:
+        -   `int Id` (Primary Key)
+        -   `string Username`
+        -   `string PasswordHash`
+        -   `Role Role`
+        -   `int ProjectId` (Foreign Key)
+        -   `Project Project` (Navigation Property)
+    -   Create a `Project` entity with properties:
+        -   `int Id` (Primary Key)
+        -   `string Name`
+        -   `ICollection<User> Users` (Navigation Property)
 
-*   **`InputPanel.razor`**: A component to prompt the user for unique ID input.
-*   **`MessageBoxPanel.razor`**: A flexible message box component to display information, questions, and errors.
-*   **`PassFailPanel.razor`**: A component to clearly display the final PASS/FAIL status of a test.
+### 2. Update Database Context
 
-*Status: Completed*
+-   **File:** `src/Hipot.Data/Core/Context/HipotDbContext.cs`
+-   **Actions:**
+    -   Add `DbSet<User> Users { get; set; }` and `DbSet<Project> Projects { get; set; }`.
+    -   In the `OnModelCreating` method, configure the one-to-many relationship between `Project` and `User`.
 
-## 2. Integrate the New Panels
+### 3. Database Migration
 
-The new UI panels have been integrated into the `ChannelView.razor` component. The logic to show and hide these panels based on the state of the test sequence has been added.
+-   **Actions:**
+    -   Use the `dotnet ef migrations add` command to create a new migration for the `User` and `Project` entities.
+    -   Use the `dotnet ef database update` command to apply the migration to the SQL Server database.
 
-*Status: Completed*
+### 4. Create Data Transfer Objects (DTOs)
 
-## 3. Implement the Main Form Logic
+-   **Location:** `src/Hipot.Data/Core/DTOs/`
+-   **Actions:**
+    -   Create a `UserDto` to transfer user data (e.g., `Id`, `Username`, `Role`, `ProjectId`) between the backend and the UI, excluding sensitive information like `PasswordHash`.
 
-The main application logic from the legacy `frmMain.vb` has been ported to the new application:
+### 5. Develop Services
 
-*   **Application Exit:** A safe exit feature with a confirmation prompt has been added to the `NavMenu`.
-*   **Menu/Navigation:** "About" and "Logout" options have been added to the `NavMenu`.
+-   **Location:** `src/Hipot.Data/Core/Services/`
+-   **Actions:**
+    -   Create an `IAuthenticationService` interface in the `Interfaces` sub-directory with methods like:
+        -   `Task<UserDto> LoginAsync(string username, string password);`
+        -   `Task LogoutAsync();`
+        -   `Task<UserDto> GetCurrentUserAsync();`
+    -   Create an `AuthenticationService` class in the `Implementations` sub-directory that implements the interface. This service will handle:
+        -   Password hashing and verification.
+        -   Validating user credentials against the database.
+        -   Managing user state.
 
-*Status: Completed*
+### 6. Update UI Components
 
-## 4. Refactor Event Handling
+-   **Actions:**
+    -   **Login Page (`src/Hipot/Components/Pages/Login.razor`):**
+        -   Inject `IAuthenticationService`.
+        -   Bind UI input fields to properties for username and password.
+        -   Call the `LoginAsync` method on a button click.
+    -   **Application State (`src/Hipot/Data/AppState.cs`):**
+        -   Add a property to hold the current `UserDto`.
+        -   Include methods to update and clear the user state upon login and logout.
+    -   **Route Protection (`src/Hipot/Components/Routes.razor` or `src/Hipot/Components/Layout/MainLayout.razor`):**
+        -   Inject `AppState`.
+        -   Use conditional logic to check if a user is authenticated.
+        -   Use Blazor's `<AuthorizeRouteView>` or custom logic to redirect unauthenticated users to the login page.
+        -   Show/hide UI elements based on the user's role from `AppState`.
 
-The event handling logic from the legacy application's `controlevents.vb` has been refactored and moved to the appropriate Blazor components:
+### 7. Dependency Injection
 
-*   **`SN_KeyDown`**: The user can now start a test by pressing "Enter" in the serial number field.
-*   **Elapsed Time Timer**: An elapsed time counter is now displayed for each channel during a test.
-*   **Tab Header Coloring**: The tab headers are now color-coded to indicate the status of each test channel.
-
-*Status: Completed*
-
-## 5. Vital Product Data (VPD)
-
-The legacy application has a timer for "VPD" related tasks. The functionality of this feature is not clear from the available code and documentation.
-
-*Status: Pending - More information needed.*
-
-To implement this functionality, I need more details about what the VPD timer does and what data it is supposed to handle.
+-   **File:** `src/Hipot/MauiProgram.cs`
+-   **Actions:**
+    -   Register the `IAuthenticationService` and its implementation (`AuthenticationService`).
+    -   Register the `AppState` as a singleton.

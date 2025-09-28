@@ -1,6 +1,6 @@
-﻿using Hipot.Core.Context;
-using Hipot.Core.Models;
+﻿using Hipot.Core.Models;
 using Hipot.Core.Repositories.Interfaces;
+using Hipot.Data.Core.Context;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hipot.Core.Repositories.Implementations

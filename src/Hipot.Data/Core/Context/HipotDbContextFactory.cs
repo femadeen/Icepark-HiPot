@@ -1,5 +1,4 @@
-﻿using Hipot.Core.Context;
-using Microsoft.EntityFrameworkCore.Design;
+﻿using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;

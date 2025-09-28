@@ -1,6 +1,6 @@
-﻿using Hipot.Core.Context;
-using Hipot.Core.DTOs;
+﻿using Hipot.Core.DTOs;
 using Hipot.Core.Services.Interfaces;
+using Hipot.Data.Core.Context;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -19,10 +19,11 @@ namespace Hipot.Core.Services.Implementations
             _context = context;
         }
 
-        public async Task<UserInfo?> ValidateUserAsync(string userEN, string password)
+        public async Task<UserInfo> ValidateUserAsync(string userEN, string password)
         {
-            return await _context.Users
-                .FirstOrDefaultAsync(u => u.UserEN == userEN && u.Password == password);
+            return null;
+            //return await _context.Users
+            //    .FirstOrDefaultAsync(u => u.Username == userEN && u.PasswordHash == password);
         }
     }
 }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Hipot.Core.Services.Implementations;
@@ -167,16 +167,16 @@ public class MappingService
     {
         try
         {
-            string portName = args[0];
-            string portKey = $"{state.Idm}_{portName}"; // Construct the port key
+            string portKey = args[0];
+            //string portKey = $"{state.Idm}_{portName}"; // Construct the port key
             string data = args[1];
             string suffix = args.Length > 2 ? GetSuffix(args[2]) : "\r";
 
-            if (state.PortData.ContainsKey(portName))
-            {
-                state.PortData[portName] = string.Empty;
-            }
-            _dataService.PutTempData(state.Idm, portName, string.Empty);
+            //if (state.PortData.ContainsKey(portKey))
+            //{
+            //    state.PortData[portName] = string.Empty;
+            //}
+            _dataService.PutTempData(state.Idm, portKey, string.Empty);
 
             _serialPortService.WriteToSrp(portKey, data + suffix);
             _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "DONE");
@@ -316,8 +316,8 @@ public class MappingService
     {
         try
         {
-            string portName = args[0];
-            string portKey = $"{state.Idm}_{portName}"; // Construct the port key
+            string portKey = args[0];
+            //string portKey = $"{state.Idm}_{portName}"; // Construct the port key
 
             string newData = _serialPortService.ReadFromSrp(portKey);
 
@@ -327,15 +327,15 @@ public class MappingService
                 return;
             }
 
-            if (!state.PortData.ContainsKey(portName))
-            {
-                state.PortData[portName] = string.Empty;
-            }
+            //if (!state.PortData.ContainsKey(portName))
+            //{
+            //    state.PortData[portName] = string.Empty;
+            //}
 
-            state.PortData[portName] += newData;
+            state.PortData[portKey] += newData;
 
             // For compatibility with functions that use GetValFromStdParam
-            _dataService.PutTempData(state.Idm, portName, state.PortData[portName]);
+            _dataService.PutTempData(state.Idm, portKey, state.PortData[portKey]);
 
             _dataService.UpdateMainScanRow(state.Idm, state.SequencePointer, "DONE");
         }

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.IO.Ports;
 using System.Threading.Tasks;
@@ -7,7 +7,12 @@ namespace Hipot.Core.Services
 {
     public class SerialPortService : IDisposable
     {
-        private readonly ConcurrentDictionary<string, SerialPort> _serialPorts = new();
+        private static readonly ConcurrentDictionary<string, SerialPort> _serialPorts = [];
+
+        public ConcurrentDictionary<string, SerialPort> GetSerialPorts()
+        {
+            return _serialPorts;
+        }
 
         public void AddPort(string portKey, string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits)
         {

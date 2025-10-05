@@ -42,13 +42,13 @@
 	<srpronly>SRP_0</srpronly>
 	<chkinword>SRP_0,PASS,failstop</chkinword>
 </test>
-<posttest tname="ODC XML Upload">		
+<!-- <posttest tname="ODC XML Upload">		
 
 	<getodcnewticket>TICKET,http://10.196.100.17/des/elm/getticket.asp?SN=(*UUTSN*)</getodcnewticket>
     <regetodcticket>TICKET,http://10.196.100.17/des/elm/getparameter.asp?sn=(*UUTSN*)&amp;profile=ticket</regetodcticket>
 	<chkodc>TICKET,TICKET</chkodc>
 	<getodcxmlformat>BXML,(*ODCTESTRESULT*),C:\Rho200-Hipot\oXml\elm_pass.xml,C:\Rho200-Hipot\oXml\elm_fail.xml</getodcxmlformat>
-<!--	<display>(*TICKET*):(*UUTSN*):(*ODCCURST*):(*TESTERID*):(*UEN*):(*ODCTESTRESULT*):(*SRP_0*):(*FAILDESC*)</display>-->
+<display>(*TICKET*):(*UUTSN*):(*ODCCURST*):(*TESTERID*):(*UEN*):(*ODCTESTRESULT*):(*SRP_0*):(*FAILDESC*)</display>
 	<getodcxml>XML,(*BXML*),(*TICKET*),(*UUTSN*),(*ODCCURST*),(*TESTERID*),(*UEN*),(*ODCTESTRESULT*),(*SRP_0*),(*FAILDESC*)</getodcxml>	
 	<gethttppostxml>(*XML*),http://10.196.100.17/des/elm/result.asp</gethttppostxml>
 	
@@ -57,5 +57,5 @@
 	<processdata>PROCESS,http://10.196.100.17/des/elm/process.asp?ticket=(*TICKET*)&amp;process=true</processdata>
 	<display>Process Data : (*PROCESS*),(*NA*)</display> 
 	<chkinword>PROCESS,SUCCESS,failstop</chkinword>
-</posttest>
+</posttest> -->
 </maintest>

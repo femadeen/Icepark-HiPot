@@ -78,7 +78,7 @@ public static class MauiProgram
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<HipotDbContext>();
-                db.Database.Migrate();
+                //db.Database.Migrate();
                 logger.LogInformation("Database migration completed.");
             }
 

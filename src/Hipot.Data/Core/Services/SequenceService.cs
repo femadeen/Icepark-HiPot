@@ -1,4 +1,4 @@
-using Hipot.Core.DTOs;
+﻿using Hipot.Core.DTOs;
 using System.Collections.Concurrent;
 using System.Data;
 using System.Threading.Tasks;
@@ -25,7 +25,7 @@ public class TestChannelState
     public TestHeaderInfo HeaderInfo { get; set; }
     public DateTime? StartTime { get; set; }
     public DateTime? EndTime { get; set; }
-    public Dictionary<string, string> PortData { get; set; } = new();
+    public Dictionary<string, string> PortData { get; set; } = [];
     public System.Text.StringBuilder MainLog { get; } = new();
     public System.Text.StringBuilder DetailLog { get; } = new();
 
@@ -39,7 +39,7 @@ public class TestChannelState
         TestResult = "PASSED";
         FirstFailDescription = null;
         CurrentTestStepName = null;
-        PortData.Clear();
+        //PortData.Clear();
         MainLog.Clear();
         DetailLog.Clear();
     }
@@ -50,13 +50,14 @@ public class SequenceService
     private readonly DataService _dataService;
     private readonly XmlLogService _logService;
     private readonly MappingService _mappingService;
+    private readonly SerialPortService SerialPortService;
 
     public event Action<int, string> OnLogMessage;
     public event Action<int, string> OnDetailLogMessage;
     public event Action<int> OnTestCompleted;
     public event Action<int, int> OnProgressUpdate;
 
-    private readonly ConcurrentDictionary<int, TestChannelState> _channelStates = new();
+    private static readonly ConcurrentDictionary<int, TestChannelState> _channelStates = [];
 
     public SequenceService(DataService dataService, XmlLogService logService, MappingService mappingService)
     {
@@ -73,6 +74,11 @@ public class SequenceService
     public async Task ExecuteTestSequenceAsync(int idm)
     {
         if (!_channelStates.TryGetValue(idm, out var state)) return;
+        //foreach (var port in SerialPortService.GetSerialPorts())
+        //{
+
+        //    state.PortData.Add(port.Key, port.Value.ToString());
+        //}
 
         state.Reset();
         state.CurrentStatus = "TESTING";
